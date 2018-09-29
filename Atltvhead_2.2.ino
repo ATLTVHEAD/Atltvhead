@@ -14,14 +14,14 @@
 //------------------------------------------------------------------------------------------------------//
 //wifi login setup
 
-#define ssid1         
-#define password1     
+#define ssid1         ""
+#define password1     ""
 
-#define ssid2         
-#define password2     
+#define ssid2         ""
+#define password2     ""
 
-#define ssid3          
-#define password3      
+#define ssid3          ""
+#define password3      ""
 
 char pasnum='B';
 
@@ -29,9 +29,9 @@ char pasnum='B';
 
 #define IRC_SERVER   "irc.chat.twitch.tv"
 #define IRC_PORT     6667
-#define IRC_NICK     
-#define IRC_CHAN     
-#define IRC_PASS     
+#define IRC_NICK     ""
+#define IRC_CHAN     ""
+#define IRC_PASS     ""
 
 //naming wifi and server client
 
@@ -40,10 +40,8 @@ IRCClient client(IRC_SERVER, IRC_PORT, wiFiClient);
 
 //----------------------------------------------------------------------------------------------------//
 
-//positive message index
 int posin = 0;
 int posinold = 0;
-
 //----------------------------------------------------------------------------------------------------//
 #define CHIPSET WS2812B
 #define PIN D3
@@ -347,6 +345,7 @@ switch(chanel){
       if(MLF==true){
         mirrorLeftToRight();
       }
+      
       displayScreen();
       break;
       
@@ -364,7 +363,7 @@ switch(chanel){
       break;
       
     case 5:
-    
+        
         if(MLF==true){
           mirrorLeftToRight();
         }
@@ -406,33 +405,8 @@ void callback(IRCMessage ircMessage) {
     String message("<" + ircMessage.nick + "> " + ircMessage.text);
     Serial.println(message);
     ///////////////////////////////////////////////////////////////////////////////////////////
-	  if (ircMessage.text == "!love"){
-            client.sendMessage(IRC_CHAN,"TvheadBot loves " + ircMessage.nick);
-	  }
-    else if(ircMessage.text == "!hug"){
-          client.sendMessage(IRC_CHAN,"TvheadBot hugs " + ircMessage.nick);
-    }
-    else if(ircMessage.text == "!atltvhead"){
+    if(ircMessage.text == "!atltvhead"){
       client.sendMessage(IRC_CHAN, "Atltvhead is a force of positivity in Atlanta. Together we can build a community of love, peace, and encouragement.");
-    }
-    else if(ircMessage.text == "!help"){
-      client.sendMessage(IRC_CHAN, "Looking for the chat commands? Scroll to the bottom of the page on https://www.twitch.com/atltvhead");
-    }
-    else if(ircMessage.text =="!tvbot"){
-      client.sendMessage(IRC_CHAN, "Hello " + ircMessage.nick + "! I'm TvheadBot, atltvhead's assistant and muscle power. I am the brains inside the tvhead, and am the controller behind the screen. If you'd like to manipulate the tvhead, just let me know what command you'd like. If you'd like a hug, I can do that. If you'd like a word of encouragment, I am here for you.");
-    }
-    else if(ircMessage.text == "!howtoshare"){
-      client.sendMessage(IRC_CHAN, "I see you'd like to submit some words of encouragement, a story of struggle and overcoming, or even some goals you'd like to see this community work on! Plz whipser atltvhead with the story right in chat (/w atltvhead message).  You can also email atltvhead at atltvhead.com");
-    }
-    else if(ircMessage.text == "!goodvibes"){
-      while (posin == posinold){
-        posin = random(0,6);  // CHANGE ME FOR MORE MESSAGES
-       //Serial.println("Im in the while loop");                                  // ----------------------------------------------------!!!!!!!!!!!!!    FIX ME CHANGE THE MESSAGE ---------------------------------------
-      }
-      client.sendMessage(IRC_CHAN, woe());
-    }
-    else if(ircMessage.text == "!goals"){
-      client.sendMessage(IRC_CHAN, goals());
     }
     else if(ircMessage.text == "!ch0" && ircMessage.nick == "atltvhead"){
       chanel = 0;
@@ -538,6 +512,17 @@ void callback(IRCMessage ircMessage) {
       chanel = 4;
       client.sendMessage(IRC_CHAN,ircMessage.nick + " has made me into a Twilight Vampire? Team Bella!");
     }
+    else if(ircMessage.text =="High Five Mode Initiated"){
+      color = cHue;
+       for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
+        for(int indPPG =0; indPPG<=5;indPPG++){
+          ppg(indPPG);
+        }
+       }
+       color = 211;
+       chanel = 4;
+       channelSwitch = true;
+    }
     
     
     
@@ -572,40 +557,6 @@ void timeout(String uname){
 // these are the tvhead helper functions. 
 
 
-String woe(){
-  String message = "";
-  // This will be for sending out words of encouragement as in woe. 
-      if(posin == 0){
-        message = "Where you go, go with all your heart";
-      }
-      else if(posin == 1){
-        message = "Be kind to yourself";
-      }
-      else if(posin == 2){
-        message = "Let go of your fear";
-      }
-      else if(posin == 3){
-        message = "Whatever makes you weird, embrace it";
-      }
-      else if(posin == 4){
-        message = "Our greatest glory is not in never falling, but in rising every time we fall";
-      }
-      else if(posin == 5){
-        message = "It does not matter how slowly you go so long as you do not stop";
-      }
-      
-      
-      return message;
-    }
-
-
-String goals(){
-  String goallist = " ";
-  if(goallist == " ");{
-    goallist = "The main goals are to have a good time, be kind, and interact with people using the tv! Type !howtoshare' for instructions on submitting more goals!";
-  }
-  return goallist;
-}
 
 
 
@@ -816,8 +767,6 @@ void ppg(byte frame){
       
       leds[XY(5, 6)-1] = CHSV(color,sat,255);
       leds[XY(12, 6)-1] = CHSV(color,sat,255);
-
-     
       }
       
 
@@ -993,7 +942,6 @@ void sparkles(){
     }
   } 
 }
-
 
 
 
