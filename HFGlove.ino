@@ -9,20 +9,20 @@ Written Nate Damen
 #include <IRCClient.h>
 #include <Math.h>
 /*-----------------------------------------------------------------------------------*/
-#define ssid1         
-#define password1     
+#define ssid1         "IgotthePoops"
+#define password1     "AcerbiNimbus"
 
-#define ssid2         
-#define password2     
+#define ssid2         "DestructionDynamics"
+#define password2     "CealiNimbus"
 
-#define ssid3          
-#define password3      
+#define ssid3          "ATT8Jmy7qw"
+#define password3      "7pbw6k?shf9p"
 
 #define IRC_SERVER   "irc.chat.twitch.tv"
 #define IRC_PORT     6667
-#define IRC_NICK     
-#define IRC_CHAN     
-#define IRC_PASS     
+#define IRC_NICK     "tvheadbot"
+#define IRC_CHAN     "#atltvhead"
+#define IRC_PASS     "oauth:0hr40w69fcqdgl8frc4ti09i5g3s3w"
 
 //naming wifi and server client
 
@@ -289,6 +289,7 @@ void ban(String username){
   whotoban = ".ban " + username;
   client.sendMessage(IRC_CHAN, whotoban);
 }
+
 
 
 
