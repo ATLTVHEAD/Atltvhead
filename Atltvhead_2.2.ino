@@ -8,7 +8,7 @@
 #include <FontMatrise.h>
 #include <ESP8266WiFi.h>
 #include <IRCClient.h>
-#include <Math.h> 
+#include <Math.h>
 
 
 //------------------------------------------------------------------------------------------------------//
@@ -60,11 +60,11 @@ CRGB leds[NUM_LEDS];
 // Param for serpentine led layout
 const bool    kMatrixSerpentineLayout = true;
 
-// Use the "XY" function to generate the led number 
+// Use the "XY" function to generate the led number
 uint16_t XY( uint8_t x, uint8_t y)
 {
   uint16_t i;
-  
+
   if( kMatrixSerpentineLayout == false) {
     i = (y * kMatrixWidth) + x;
   }
@@ -79,7 +79,7 @@ uint16_t XY( uint8_t x, uint8_t y)
       i = (y * kMatrixWidth) + x;
     }
   }
-  
+
   return i;
 }
 
@@ -150,7 +150,7 @@ bool tv[9][18]={
  };
 
 
- 
+
 
 //---------------------------------------------------------------------------------------------------//
 
@@ -163,16 +163,16 @@ int hcind = 0;
 bool flicker = false;
 
 //hsv color values for hear animation
-uint8_t color = 211;     //CHSV(211,255,255)  Pink  //CHSV(211,100,255) Light Pink //CHSV(135,255,255)  Blue   
-uint8_t oldColor = 135;  
+uint8_t color = 211;     //CHSV(211,255,255)  Pink  //CHSV(211,100,255) Light Pink //CHSV(135,255,255)  Blue
+uint8_t oldColor = 135;
 uint8_t colorHolder = 0;
 
 //saturation values for heart animation
-uint8_t sat = 255;     //CHSV(211,255,255)  Pink  //CHSV(211,100,255) Light Pink //CHSV(135,255,255)  Blue   
-uint8_t oldSat = 150;  
+uint8_t sat = 255;     //CHSV(211,255,255)  Pink  //CHSV(211,100,255) Light Pink //CHSV(135,255,255)  Blue
+uint8_t oldSat = 150;
 uint8_t satHolder = 0;
 
-// for demonDelay function 
+// for demonDelay function
 long totalTime = 0;
 
 
@@ -184,17 +184,17 @@ boolean MLF = false;
 void setup() {
 // From the FASTLED CODE
   //---------------------------------------------
-  FastLED.addLeds<CHIPSET, PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050); 
+  FastLED.addLeds<CHIPSET, PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
   FastLED.setBrightness( bright );
   //FastLED.clear(true);
-  heart();  
+  heart();
   displayScreen();
 
   delay(100);
 
   //Serial.begin(115200);
   //---------------------
-  
+
   ScrollingMsg.SetFont(MatriseFontData);
   ScrollingMsg.Init(&LEDs, LEDs.Width(), ScrollingMsg.FontHeight()+1, 0, 0);
   ScrollingMsg.SetText((unsigned char *)txt, sizeof(txt) - 1);
@@ -203,31 +203,31 @@ void setup() {
   //  FROM THE IRC TWITCHBOT CODE
   //-----------------------------------------------------------------------
 
-  
+
   pinMode(LED_BUILTIN, OUTPUT);
 
   delay(100);
 
 // add way to autochange wifi networks
-  
+
   WiFi.begin(ssid1, password1);
 
   while (WiFi.status() != WL_CONNECTED) {
-    
+
     digitalWrite(LED_BUILTIN, LOW);
     demonDelay(250);
     digitalWrite(LED_BUILTIN, HIGH);
     demonDelay(250);
 
-    client.setCallback(callback); 
+    client.setCallback(callback);
     client.setSentCallback(debugSentCallback);
- 
+
     if(wificount>15){
         WiFi.disconnect();
         digitalWrite(LED_BUILTIN,LOW);
-        break; 
+        break;
     }
-    ++wificount; 
+    ++wificount;
   }
 }
 
@@ -237,9 +237,9 @@ void setup() {
 
 
 void loop() {
-  
+
   if(WiFi.status() != WL_CONNECTED){
-    
+
     digitalWrite(LED_BUILTIN, HIGH);
     switch (pasnum){
       case 'A':
@@ -249,17 +249,17 @@ void loop() {
         WiFi.begin(ssid2, password2);
         break;
     }
-   
+
     while (WiFi.status() != WL_CONNECTED) {
-    
+
       digitalWrite(LED_BUILTIN, LOW);
       demonDelay(250);
       digitalWrite(LED_BUILTIN, HIGH);
       demonDelay(250);
 
-      client.setCallback(callback); 
+      client.setCallback(callback);
       client.setSentCallback(debugSentCallback);
- 
+
       if(wificount>15){
           WiFi.disconnect();
           digitalWrite(LED_BUILTIN,LOW);
@@ -272,17 +272,17 @@ void loop() {
           else{
             pasnum='A';
           }
-          
-          break; 
+
+          break;
       }
-      ++wificount; 
+      ++wificount;
     }
   }
 
-  
-  // getting the Chat going and reading 
+
+  // getting the Chat going and reading
   //---------------------------------------------------------
-  
+
   if (!client.connected()) {
     Serial.println("Attempting IRC connection...");
     // Attempt to connect
@@ -297,7 +297,7 @@ void loop() {
     return;
   }
   client.loop();
-  
+
   ms = millis();
   yHueDelta32 = ((int32_t)cos16( ms * (27/1) ) * (350 / kMatrixWidth));
   xHueDelta32 = ((int32_t)cos16( ms * (39/1) ) * (310 / kMatrixHeight));
@@ -345,10 +345,10 @@ switch(chanel){
       if(MLF==true){
         mirrorLeftToRight();
       }
-      
+
       displayScreen();
       break;
-      
+
     case 4:
       sparkles();
       demonDelay(50);
@@ -357,19 +357,19 @@ switch(chanel){
       }
       displayScreen();
       break;
-      
+
     case 0:
         FastLED.clear(true);
       break;
-      
+
     case 5:
-        
+
         if(MLF==true){
           mirrorLeftToRight();
         }
-        displayScreen();  
+        displayScreen();
       break;
-      
+
     case 1:
       if(channelSwitch == true){
           //Serial.println("I am inside the heart command");
@@ -380,7 +380,7 @@ switch(chanel){
         }
       break;
   }
-  
+
   //Serial.println(channelSwitch);
   posinold = posin;
 }
@@ -405,10 +405,7 @@ void callback(IRCMessage ircMessage) {
     String message("<" + ircMessage.nick + "> " + ircMessage.text);
     Serial.println(message);
     ///////////////////////////////////////////////////////////////////////////////////////////
-    if(ircMessage.text == "!atltvhead"){
-      client.sendMessage(IRC_CHAN, "Atltvhead is a force of positivity in Atlanta. Together we can build a community of love, peace, and encouragement.");
-    }
-    else if(ircMessage.text == "!ch0" && ircMessage.nick == "atltvhead"){
+    if(ircMessage.text == "!ch0" && ircMessage.nick == "atltvhead"){
       chanel = 0;
       client.sendMessage(IRC_CHAN, ircMessage.nick + " set atltvhead to the secret 0!");
       //Serial.println(chanel);
@@ -416,7 +413,7 @@ void callback(IRCMessage ircMessage) {
     else if(ircMessage.text == "<3"){
       chanel = 1;
       channelSwitch = true;
-      
+
       if(heartcount >= 2){
       client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, you've shown your heart! YOU ARE AWESOME! THANK YOU!!!!!!!!!!");
        for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
@@ -434,7 +431,7 @@ void callback(IRCMessage ircMessage) {
       }
     }
     else if(ircMessage.text == "1" && ircMessage.nick == "atltvhead"){
-      //client.sendMessage(IRC_CHAN, ircMessage.nick + " It's PowerPuff Girl's Heart Time!");     
+      //client.sendMessage(IRC_CHAN, ircMessage.nick + " It's PowerPuff Girl's Heart Time!");
        for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
         for(int indPPG =0; indPPG<=5;indPPG++){
           ppg(indPPG);
@@ -444,11 +441,9 @@ void callback(IRCMessage ircMessage) {
     }
     else if(ircMessage.text == "!flicker"){
       flicker = true;
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " is messing with my signals! Someone help!");
     }
     else if(ircMessage.text == "!flickerOff"){
       flickoverRide = true;
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " has saved me!!! Virtual hug, just for you!");
     }
     else if(ircMessage.text == "!brighter"){
       bright = bright +50;
@@ -490,11 +485,8 @@ void callback(IRCMessage ircMessage) {
     }
     else if(ircMessage.text == "!rainbowHeart"){
       chanel = 2;
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " set atltvhead to rainbow heart!");
     }
     else if(ircMessage.text =="!fullRainbow"){
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " has gone FULL RAINBOW!!");
-      
       fullrainbow = true;
     }
     else if(ircMessage.text =="!Merica" && ircMessage.nick == "atltvhead"){
@@ -510,7 +502,6 @@ void callback(IRCMessage ircMessage) {
     }
     else if(ircMessage.text =="!sparkles"){
       chanel = 4;
-      client.sendMessage(IRC_CHAN,ircMessage.nick + " has made me into a Twilight Vampire? Team Bella!");
     }
     else if(ircMessage.text =="High Five Mode Initiated"){
       color = cHue;
@@ -523,9 +514,9 @@ void callback(IRCMessage ircMessage) {
        chanel = 4;
        channelSwitch = true;
     }
-    
-    
-    
+
+
+
 
     return;
   }
@@ -534,7 +525,7 @@ void callback(IRCMessage ircMessage) {
 
 
 
- 
+
 
 void debugSentCallback(String data) {
   //Serial.println("I am in debug");
@@ -554,7 +545,7 @@ void timeout(String uname){
 }
 
 //--------------------------------------------------------------------------------------------------
-// these are the tvhead helper functions. 
+// these are the tvhead helper functions.
 
 
 
@@ -564,7 +555,7 @@ void timeout(String uname){
 //_________________________________________________________________________________________
 // heart effect
 void heart(){
-  for( byte y = 0; y < kMatrixHeight; y++) {    
+  for( byte y = 0; y < kMatrixHeight; y++) {
     for( byte x = 0; x < kMatrixWidth; x++) {
      if( XY(x,y)<=126){
         if(tv[y][x]){
@@ -574,7 +565,7 @@ void heart(){
           leds[XY(x,y)]=CHSV(cbHue,cbSat,cbVal);
         }
       }
-      
+
       else if(XY(x,y)>126 && XY(x,y)<142){
         if(tv[y][x]){
         leds[XY(x,y)-1] = CHSV( cHue, cSat,cVal);
@@ -583,7 +574,7 @@ void heart(){
           leds[XY(x,y)-1]=CHSV(cbHue,cbSat,cbVal);
         }
       }
-      
+
       else{
         if(tv[y][x]){
         leds[XY(x,y)-3]=CHSV(cHue,cSat,cVal);
@@ -650,7 +641,7 @@ void resetHeart(){
 
 
 void ppg(byte frame){
-  
+
   if(frame ==0){
     fill_solid(leds,NUM_LEDS, CHSV(oldColor,oldSat,255)); // change this to a solid fill
       FastLED.show();
@@ -674,7 +665,7 @@ void ppg(byte frame){
       leds[XY( 8, 5)] = CHSV(color,sat,255);
       leds[XY( 9, 5)] = CHSV(color,sat,255);
       }
-      
+
     else if(frame==2){
 
       leds[XY( 5, 1)] = CHSV(color,sat,255);
@@ -682,7 +673,7 @@ void ppg(byte frame){
 
       leds[XY( 11, 1)] = CHSV(color,sat,255);
       leds[XY( 12, 1)] = CHSV(color,sat,255);
-      
+
       for(int xj = 4; xj<14; xj++){
         leds[XY( xj, 2)] = CHSV(color,sat,255);
         yield();
@@ -704,13 +695,13 @@ void ppg(byte frame){
 
         leds[XY( 10, 5)] = CHSV(color,sat,255);
         leds[XY( 11, 5)] = CHSV(color,sat,255);
-        
+
         for(int xi = 7; xi<12; xi++){
           leds[XY( xi, 6)] = CHSV(color,sat,255);
           yield();
-        } 
+        }
       }
-      
+
     else if(frame==3){
       leds[XY( 5, 0)] = CHSV(color,sat,255);
       leds[XY( 6, 0)] = CHSV(color,sat,255);
@@ -740,44 +731,44 @@ void ppg(byte frame){
       leds[XY( 8, 7)] = CHSV(color,sat,255);
       leds[XY( 9, 7)] = CHSV(color,sat,255);
       }
-      
+
     else if(frame==4){
       for(int xk = 3; xk<16; xk++){
           leds[XY( xk, 0)] = CHSV(color,sat,255);
           yield();
-        } 
+        }
 
       for(int xl = 2; xl<17; xl++){
           leds[XY( xl, 1)] = CHSV(color,sat,255);
           yield();
-        } 
+        }
 
-        
+
       leds[XY( 2, 2)] = CHSV(color,sat,255);
       leds[XY( 15, 2)] = CHSV(color,sat,255);
-      
+
       leds[XY( 2, 3)] = CHSV(color,sat,255);
       leds[XY( 15, 3)] = CHSV(color,sat,255);
-      
+
       leds[XY( 3, 4)] = CHSV(color,sat,255);
       leds[XY( 14, 4)] = CHSV(color,sat,255);
-      
+
       leds[XY( 4, 5)] = CHSV(color,sat,255);
       leds[XY( 13, 5)] = CHSV(color,sat,255);
-      
+
       leds[XY(5, 6)-1] = CHSV(color,sat,255);
       leds[XY(12, 6)-1] = CHSV(color,sat,255);
       }
-      
 
-            
+
+
     else{
       fill_solid(leds,NUM_LEDS, CHSV(color,sat,255)); // change this to a solid fill
       satHolder = oldSat;
       oldSat = sat;
-      sat = satHolder;       
+      sat = satHolder;
       }
-   
+
     FastLED.show();
     demonDelay(70);
 }
@@ -789,21 +780,21 @@ void DrawOneFrame( byte startHue8, int8_t yHueDelta8, int8_t xHueDelta8)
   byte lineStartHue = startHue8;
   for( byte y = 0; y < kMatrixHeight; y++) {
     lineStartHue += yHueDelta8;
-    byte pixelHue = lineStartHue;      
+    byte pixelHue = lineStartHue;
     for( byte x = 0; x < kMatrixWidth; x++) {
       pixelHue += xHueDelta8;
       if( XY(x,y)<126){
           leds[ XY(x, y)]  = CHSV( pixelHue+hue, 255, 255);
       }
-      
+
       else if(XY(x,y) == 126){
         leds[ XY(x, y)]  = CHSV( pixelHue+hue, 255, 255);
       }
-      
+
       else if(XY(x,y)>126 && XY(x,y)<142){
         leds[XY(x,y)-1] = CHSV( pixelHue+hue, 255,255);
       }
-      
+
       else{
         leds[XY(x,y)-3]=CHSV(pixelHue+hue,255,255);
       }
@@ -830,10 +821,10 @@ void demonDelay(long msec){
 }
 
 
-void superRainbowHeart(){  
-  for( byte y = 0; y < kMatrixHeight; y++) {    
+void superRainbowHeart(){
+  for( byte y = 0; y < kMatrixHeight; y++) {
     for( byte x = 0; x < kMatrixWidth; x++) {
-      
+
      if( XY(x,y)<=126){
         if(tv[y][x]){
           yield();
@@ -842,7 +833,7 @@ void superRainbowHeart(){
           leds[XY(x,y)]=CHSV(cbHue,cbSat,cbVal);
         }
       }
-      
+
       else if(XY(x,y)>126 && XY(x,y)<142){
         if(tv[y][x]){
           yield();
@@ -851,7 +842,7 @@ void superRainbowHeart(){
           leds[XY(x,y)-1]=CHSV(cbHue,cbSat,cbVal);
         }
       }
-      
+
       else{
         if(tv[y][x]){
           yield();
@@ -868,13 +859,13 @@ void superRainbowHeart(){
 
 void mirrorLeftToRight(){
   // Here we are setting the bottom led's to their top led counter part -> take into consideration the 3 missing pixels on the bottom
-  //row and the one missing pixel on the second to bottom row just like in the Heart settings! 
+  //row and the one missing pixel on the second to bottom row just like in the Heart settings!
 
 for(byte y = 0; y < kMatrixHeight; y++){
   for(byte x = 0; x < 9; x++){
       if( XY(x,y)<126){
           leds[ XY(x, y)] = leds[ XY(17-x,y) ];
-      }  
+      }
       else if(XY(x,y) == 126){
         leds[ XY(x, y)]  = leds[XY(17-x,y)];
       }
@@ -911,7 +902,7 @@ void sparkles(){
           leds[XY(x,y)]=CHSV(cbHue,cbSat,cbVal);
         }
       }
-      
+
       else if(XY(x,y)>126 && XY(x,y)<142){
         if(tv[y][x]){
           if(sprand < 15){
@@ -925,7 +916,7 @@ void sparkles(){
           leds[XY(x,y)-1]=CHSV(cbHue,cbSat,cbVal);
         }
       }
-      
+
       else{
         if(tv[y][x]){
           if(sprand < 15){
@@ -938,11 +929,7 @@ void sparkles(){
         else{
           leds[XY(x,y)-3]=CHSV(cbHue,cbSat,cbVal);
         }
-      } 
+      }
     }
-  } 
+  }
 }
-
-
-
-

@@ -1,7 +1,7 @@
 /*
 High Five Glove Twitch Augmentation
 Yay and Atltvhead
-Written Nate Damen 
+Written Nate Damen
 09/26/2018
 */
 #include<FastLED.h>
@@ -37,7 +37,9 @@ bool touch1detected = false;
 
 
 void gotTouch1(){
+  
  touch1detected = true;
+
 }
 
 
@@ -51,7 +53,7 @@ int posinold = 0;
 
 String woe(){
   String message = "";
-  // This will be for sending out words of encouragement as in woe. 
+  // This will be for sending out words of encouragement as in woe.
       if(posin == 0){
         message = "Where you go, go with all your heart";
       }
@@ -70,8 +72,8 @@ String woe(){
       else if(posin == 5){
         message = "It does not matter how slowly you go so long as you do not stop";
       }
-      
-      
+
+
       return message;
     }
 
@@ -105,11 +107,11 @@ CRGB leds[NUM_LEDS];
 // Param for serpentine led layout
 const bool    kMatrixSerpentineLayout = true;
 
-// Use the "XY" function to generate the led number 
+// Use the "XY" function to generate the led number
 uint16_t XY( uint8_t x, uint8_t y)
 {
   uint16_t i;
-  
+
   if( kMatrixSerpentineLayout == false) {
     i = (y * kMatrixWidth) + x;
   }
@@ -124,7 +126,7 @@ uint16_t XY( uint8_t x, uint8_t y)
       i = (y * kMatrixWidth) + x;
     }
   }
-  
+
   return i;
 }
 /*----------------------------------------------------------------------------------*/
@@ -133,9 +135,9 @@ uint16_t XY( uint8_t x, uint8_t y)
 
 void setup() {
   Serial.begin(115200);
-  //FastLED.addLeds<CHIPSET, PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050); 
+  //FastLED.addLeds<CHIPSET, PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
   //FastLED.setBrightness( bright );
-  
+
   delay(1000); // give me time to bring up serial monitor
   Serial.println("ESP32 Touch Interrupt Test");
   touchAttachInterrupt(T6, gotTouch1, threshold);
@@ -146,7 +148,7 @@ void setup() {
   delay(100);
 
 // add way to autochange wifi networks
-  
+
   WiFi.begin(ssid1, password1);
   while (WiFi.status() != WL_CONNECTED) {
     digitalWrite(LED_BUILTIN, LOW);
@@ -154,15 +156,15 @@ void setup() {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(250);
 
-    client.setCallback(callback); 
+    client.setCallback(callback);
     client.setSentCallback(debugSentCallback);
- 
+
     if(wificount>15){
         WiFi.disconnect();
         digitalWrite(LED_BUILTIN,LOW);
-        break; 
+        break;
     }
-    ++wificount; 
+    ++wificount;
   }
 }
 
@@ -171,7 +173,7 @@ void setup() {
 
 void loop(){
     if(WiFi.status() != WL_CONNECTED){
-    
+
     digitalWrite(LED_BUILTIN, HIGH);
     switch (pasnum){
       case 'A':
@@ -181,16 +183,16 @@ void loop(){
         WiFi.begin(ssid2, password2);
         break;
     }
-   
+
     while (WiFi.status() != WL_CONNECTED) {
       digitalWrite(LED_BUILTIN, LOW);
       delay(250);
       digitalWrite(LED_BUILTIN, HIGH);
       delay(250);
 
-      client.setCallback(callback); 
+      client.setCallback(callback);
       client.setSentCallback(debugSentCallback);
- 
+
       if(wificount>15){
           WiFi.disconnect();
           digitalWrite(LED_BUILTIN,LOW);
@@ -201,15 +203,15 @@ void loop(){
           else{
             pasnum='A';
           }
-          
-          break; 
+
+          break;
       }
-      ++wificount; 
+      ++wificount;
     }
   }
-  // getting the Chat going and reading 
+  // getting the Chat going and reading
   //---------------------------------------------------------
-  
+
   if (!client.connected()) {
     //Serial.println("Attempting IRC connection...");
     // Attempt to connect
@@ -225,7 +227,7 @@ void loop(){
   }
   client.loop();
 
-  
+
   if(touch1detected){
     touch1detected = false;
     client.sendMessage(IRC_CHAN,"High Five Mode Initiated");
@@ -243,7 +245,10 @@ void callback(IRCMessage ircMessage) {
     String message("<" + ircMessage.nick + "> " + ircMessage.text);
     Serial.println(message);
     ///////////////////////////////////////////////////////////////////////////////////////////
-    if (ircMessage.text == "!love"){
+    if(ircMessage.text == "!atltvhead"){
+      client.sendMessage(IRC_CHAN, "Atltvhead is a force of positivity in Atlanta. Together we can build a community of love, peace, and encouragement.");
+    }
+    else if (ircMessage.text == "!love"){
       client.sendMessage(IRC_CHAN,"TvheadBot loves " + ircMessage.nick);
     }
     else if(ircMessage.text == "!hug"){
@@ -268,8 +273,58 @@ void callback(IRCMessage ircMessage) {
       }
       client.sendMessage(IRC_CHAN, woe());
     }
-    
-    
+    else if(ircMessage.text == "!flicker"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " is messing with my signals! Someone help!");
+    }
+    else if(ircMessage.text == "!flickerOff"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " has saved me!!! Virtual hug, just for you!");
+    }
+    else if(ircMessage.text == "!brighter"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " has brightend the screen. You can use this if the tv seems dim.");
+    }
+     else if(ircMessage.text == "!dimmer"){
+       client.sendMessage(IRC_CHAN, ircMessage.nick + " has dimmed the screen. You can use this to help if the camera seems dark.");
+    }
+    else if(ircMessage.text =="!heartColor"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " changed the color of my heart! Keep that color cycling");
+    }
+    else if(ircMessage.text =="!heartSat"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " has changed the color saturation");
+    }
+    else if(ircMessage.text =="!heartBright"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " has changed the color brightness");
+    }
+    else if(ircMessage.text =="!backgroundColor"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " has indexed the background color! Keep that color changing!");
+    }
+    else if(ircMessage.text =="!backgroundSat"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " has changed the background color saturation");
+    }
+    else if(ircMessage.text =="!backgroundBright"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " has changed the background Color brightness");
+    }
+    else if(ircMessage.text =="!reset"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " has reset the screen");
+    }
+    else if(ircMessage.text == "!rainbowHeart"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " set atltvhead to rainbow heart!");
+    }
+    else if(ircMessage.text =="!fullRainbow"){
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " has gone FULL RAINBOW!!");
+    }
+    else if(ircMessage.text =="!mirrorMirror"){
+
+    }
+    else if(ircMessage.text =="!mirrorOff"){
+
+    }
+    else if(ircMessage.text =="!sparkles"){
+      client.sendMessage(IRC_CHAN,ircMessage.nick + " has made me into a Twilight Vampire? Team Bella!");
+    }
+
+
+
+
     return;
   }
  }
@@ -277,7 +332,7 @@ void callback(IRCMessage ircMessage) {
 
 
 
- 
+
 
 void debugSentCallback(String data) {
   //Serial.println("I am in debug");
@@ -289,10 +344,3 @@ void ban(String username){
   whotoban = ".ban " + username;
   client.sendMessage(IRC_CHAN, whotoban);
 }
-
-
-
-
-
-
-
