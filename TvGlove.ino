@@ -9,20 +9,20 @@ Written Nate Damen
 #include <IRCClient.h>
 #include <Math.h>
 /*-----------------------------------------------------------------------------------*/
-#define ssid1         ""
-#define password1     ""
+#define ssid1         "IgotthePoops"
+#define password1     "AcerbiNimbus"
 
-#define ssid2         ""
-#define password2     ""
+#define ssid2         "DestructionDynamics"
+#define password2     "CealiNimbus"
 
-#define ssid3          ""
-#define password3      ""
+#define ssid3          "ATT8Jmy7qw"
+#define password3      "7pbw6k?shf9p"
 
 #define IRC_SERVER   "irc.chat.twitch.tv"
 #define IRC_PORT     6667
-#define IRC_NICK     ""
-#define IRC_CHAN     ""
-#define IRC_PASS     ""
+#define IRC_NICK     "tvheadbot"
+#define IRC_CHAN     "#atltvhead"
+#define IRC_PASS     "oauth:0hr40w69fcqdgl8frc4ti09i5g3s3w"
 
 //naming wifi and server client
 
@@ -31,15 +31,40 @@ IRCClient client(IRC_SERVER, IRC_PORT, wiFiClient);
 int wificount = 0;
 /*------------------------------------------------------------------------------*/
 
-
-int threshold = 62;
+int threshold = 60;
 bool touch1detected = false;
-
+byte touchCount = 0;
+unsigned long touchTime;
+unsigned long oldTouchTime;
 
 void gotTouch1(){
-  
- touch1detected = true;
-
+//figure out calibration here!
+//get time and incriment timer
+touchTime = millis();
+touchCount++;
+// if counter is above a certain # in a certain timeout decrease sensitivity (time is going to be half second)
+if(touchCount >=5 && (touchTime-oldTouchTime)<=500){
+  threshold=threshold-2;
+  // reset count
+  touchCount=0;
+  }
+// if counter is below a # and a certain timeout increase sensitivity (time is going to be 2 min?)
+else if((touchTime-oldTouchTime)>=120000){ // touchCount<1 && probably doesn't need the <1 touch count. if it creates too sensitive of a sensor, it will be backed off imediatly after. it should jut create more triggers after the high five
+  threshold++;
+  // reset counter
+  touchCount=0;
+  }
+// if counter is below # and timer is between sensitivity triggers touch detected
+else if(500<(touchTime-oldTouchTime) && (touchTime-oldTouchTime)<120000){
+  touch1detected = true;
+  // reset counter
+  }
+else{
+  yield();
+}
+// time saved to new variable and reset
+oldTouchTime = touchTime;
+//delay(500);
 }
 
 
@@ -231,7 +256,6 @@ void loop(){
   if(touch1detected){
     touch1detected = false;
     client.sendMessage(IRC_CHAN,"High Five Mode Initiated");
-    delay(500);
     //Serial.println("Touch 1 detected");
   }
 }
@@ -268,8 +292,7 @@ void callback(IRCMessage ircMessage) {
     }
     else if(ircMessage.text == "!goodvibes"){
       while (posin == posinold){
-        posin = random(0,6);  // CHANGE ME FOR MORE MESSAGES
-       //Serial.println("Im in the while loop");                                  // ----------------------------------------------------!!!!!!!!!!!!!    FIX ME CHANGE THE MESSAGE ---------------------------------------
+        posin = random(0,6);  // CHANGE ME FOR MORE MESSAGES    FIX ME CHANGE THE MESSAGE ---------------------------------------
       }
       client.sendMessage(IRC_CHAN, woe());
     }
@@ -313,17 +336,14 @@ void callback(IRCMessage ircMessage) {
       client.sendMessage(IRC_CHAN, ircMessage.nick + " has gone FULL RAINBOW!!");
     }
     else if(ircMessage.text =="!mirrorMirror"){
-
+      client.sendMessage(IRC_CHAN, ircMessage.nick + " sah detaitini edom rorrim!");
     }
     else if(ircMessage.text =="!mirrorOff"){
-
+      client.sendMessage(IRC_CHAN, "I am no longer a reflection of myself");
     }
     else if(ircMessage.text =="!sparkles"){
       client.sendMessage(IRC_CHAN,ircMessage.nick + " has made me into a Twilight Vampire? Team Bella!");
     }
-
-
-
 
     return;
   }
