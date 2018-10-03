@@ -29,7 +29,7 @@ char pasnum='B';
 
 #define IRC_SERVER   "irc.chat.twitch.tv"
 #define IRC_PORT     6667
-#define IRC_NICK     "tvheadbot"
+#define IRC_NICK     ""
 #define IRC_CHAN     ""
 #define IRC_PASS     ""
 
