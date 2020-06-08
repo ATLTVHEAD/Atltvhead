@@ -2295,7 +2295,7 @@ void BlackLivesMatterHeart(){
   for( byte y = 0; y < kMatrixHeight; y++) {
     for( byte x = 0; x < kMatrixWidth; x++) {
       if(tv[y][x]){
-        leds[ XY(x, y)]  = CHSV(cHue, 0, 255);
+        leds[ XY(x, y)]  = CHSV(200, 150, 200);
       }
       else{
         leds[XY(x,y)]=CHSV(200,255,255);
