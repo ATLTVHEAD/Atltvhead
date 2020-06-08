@@ -1,3 +1,7 @@
+/* Atltvhead.ino - Arduino code of how atltvhead helmet runs
+ * Created by Nate Damen, 2015 
+ * Apache License Version 2.0
+ */
 #include <FastLED.h>
 #include <LEDMatrix.h>
 #include <LEDText.h>

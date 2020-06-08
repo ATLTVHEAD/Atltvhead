@@ -11,6 +11,7 @@
 *.gch
 *.pch
 
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
@@ -25,9 +26,10 @@
 *.la
 *.a
 *.lib
+cred.h
 
 # Executables
 *.exe
 *.out
 *.app
-cred.h
+
