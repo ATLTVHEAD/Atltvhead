@@ -819,7 +819,26 @@ switch(chanel){
       }
       displayScreen();
       break;
+
+    case 20:
+      BlackLivesMatterHeart();
+      if(MLF==true){
+        mirrorLeftToRight();
+      }
+      if(MUD == true){
+        mirrorUptoDown();
+      }
+      if(MUP == true){
+        mirrorDowntoUp();
+      }
+      if(BLMB==true){
+        BLM();
+      }
+      displayScreen();
+      break;
+ 
   }
+
     
 
   //Serial.println(channelSwitch);
@@ -925,6 +944,7 @@ void callback(IRCMessage ircMessage) {
     }
     else if(ircMessage.text =="!reset"){
       channelSwitch = true;
+      BLMB = false;
       resetHeart();
     }
     else if(ircMessage.text == "!rainbowHeart"&& HFM==false){
@@ -1077,8 +1097,9 @@ void callback(IRCMessage ircMessage) {
     else if(ircMessage.text == "!ONoise"){
       chanel=19;
     }
-    else if(ircMessage.text == "!blm"){
+    else if(ircMessage.text == "!blm" || "!BLM"){
       BLMB = !BLMB;
+      chanel = 20;
     }
     
 
@@ -1147,6 +1168,7 @@ void heart(){
 
 
 void BLM(){
+  /*
   for( byte y = 0; y < kMatrixHeight; y++) {
     for( byte x = 0; x < kMatrixWidth; x++) {
       if(blm[y][x]){
@@ -1154,6 +1176,7 @@ void BLM(){
       }
     }  
   }
+  */
 }
 
 
@@ -2268,3 +2291,18 @@ void mapNoiseToHeartWithOutline()
 //tornado data animation
 
 //
+void BlackLivesMatterHeart(){
+  for( byte y = 0; y < kMatrixHeight; y++) {
+    for( byte x = 0; x < kMatrixWidth; x++) {
+      if(tv[y][x]){
+        leds[ XY(x, y)]  = CHSV(cHue, 0, 255);
+      }
+      else{
+        leds[XY(x,y)]=CHSV(cbHue,cbSat,0);
+      }
+      if(blm[y][x]){
+        leds[ XY(x, y)]  = CHSV( 0, 0, 255);
+      }
+    }  
+  }
+}
