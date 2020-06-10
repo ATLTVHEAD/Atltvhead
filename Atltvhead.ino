@@ -1097,8 +1097,8 @@ void callback(IRCMessage ircMessage) {
     else if(ircMessage.text == "!ONoise"){
       chanel=19;
     }
-    else if(ircMessage.text == "!blm" || "!BLM" || "black lives matter"){
-      BLMB = !BLMB;
+    else if(ircMessage.text == "!blm"){
+     //BLMB = !BLMB;
       chanel = 20;
     }
     
