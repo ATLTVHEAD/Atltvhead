@@ -135,6 +135,7 @@ uint32_t yHueDelta32 = 0;
 uint32_t xHueDelta32 = 0;
 uint32_t hue = 0;
 uint8_t angle = 0;
+uint8_t mode = 0;
 
 bool HFM = false;
 double STime=0;
@@ -320,8 +321,6 @@ uint8_t satHolder = 0;
 // for demonDelay function
 long totalTime = 0;
 
-
-boolean channelSwitch = false;
 boolean MLF = false;
 boolean MUD = false;
 boolean MUP = false;
@@ -406,9 +405,6 @@ void setup() {
 
 
 
-
-
-
 void loop() {
 
   if(WiFi.status() != WL_CONNECTED){
@@ -488,21 +484,9 @@ void loop() {
 
   // generate noise data
   fillnoise8();
-  
-  
-  if(HFM==true){
-    FTime = millis();
-    BTime = FTime - STime;
-    if(BTime >= 15000){
-      chanel = oldChanel;
-      channelSwitch = true;
-      HFM=false;
-    }
-  }
 
   if(flicker == true && flickoverRide == false){
     FastLED.clear(true);
-    channelSwitch = true;
     delay(250);
     if(flick<20){
       flick++;
@@ -522,336 +506,132 @@ void loop() {
     }
   }
 
-//65536
-switch(chanel){
-    case 2:
-      DrawOneFrame( ms / 131072, xHueDelta32 / 65536, yHueDelta32 / 65536);
-      if(!fullrainbow){
-        superRainbowHeart();
-      }
-      else if(fullrainbow){
-        if(raincount <250){
-          raincount++;
-        }
-        else{
-          raincount = 0;
-          fullrainbow = false;
-        }
-      }
-      if(MLF==true){
-        mirrorLeftToRight();
-      }
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-      mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      displayScreen();
-      break;
-    case 3:
-      //I need to move the message across all 18 columns. meaning I need to get the length of the txt and make sure it moves all 18 across
-      if (ScrollingMsg.UpdateText() == -1){
-        ScrollingMsg.SetText((unsigned char *)txt, sizeof(txt) - 1);
-        }
-      displayScreen();
-      break;
-    case 4:
-      //tvColorCycle();
-      sparkles();
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-      mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      displayScreen();
-      break;
-
+  switch(mode){
     case 0:
-        FastLED.clear(true);
-      break;
-
-    case 5:
-        currentPalette = RainbowStripeColors_p;
-        SetupBlackAndWhiteStripedPalette();
-        static uint8_t startIndex = 0;
-        startIndex = startIndex + 3; /* motion speed */
-        FillLEDsFromPaletteColors1( startIndex);
-
-        
-        if(MLF==true){
-          mirrorLeftToRight();
+        switch(chanel)
+        {
+        case 0:
+            tvOutlineDisp();
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 1:
+            gradHeart();
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 2:
+            DrawOneFrame( ms / 131072, xHueDelta32 / 65536, yHueDelta32 / 65536);
+            if(!fullrainbow){
+                superRainbowHeart();
+            }
+            else if(fullrainbow){
+                if(raincount <3000){
+                    raincount++;
+                }
+                else{
+                    raincount = 0;
+                    fullrainbow = false;
+                }
+            }
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 3:
+            atlunited();
+            mirrorHandler();
+            displayScreen();
+            break;
         }
-        if(MUD == true){
-          mirrorUptoDown();
-        }
-        if(MUP == true){
-           mirrorDowntoUp();
-        }
-        if(BLMB==true){
-        BLM();
-        }
-        displayScreen();
-      break;
-
+        break;
     case 1:
-      /*if(channelSwitch == true){
-          //Serial.println("I am inside the heart command");
-          channelSwitch = false;
-          heart();
-          delay(250);
-          displayScreen();
-        }*/
-      gradHeart();
-      if(MLF==true){
-          mirrorLeftToRight();
+        switch(chanel)
+        {
+        case 0:
+            tvColorCycle();
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 1:
+            gradHeartsp();
+            delay(50);
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 2:
+            SectionGlitchesHeart();
+            mirrorHandler();
+            delay(random(250,1500));
+            displayScreen();
+            break;
+        case 3:
+            mahearta();
+            mirrorHandler();
+            displayScreen();
+            break;
         }
-        if(MUD == true){
-          mirrorUptoDown();
+        break;
+    case 2:
+        switch(chanel)
+        {
+        case 0:
+            gradHeartspcycle(cHue, cbHue);
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 1:
+            randomNoiseHeart();
+            mirrorHandler();
+            delay(random(12,125));
+            displayScreen();
+            break;
+        case 2:
+            currentPalette = RainbowStripeColors_p;
+            SetupBlackAndWhiteStripedPalette();
+            static uint8_t startIndex = 0;
+            startIndex = startIndex + 3; /* motion speed */
+            FillLEDsFromPaletteColors1( startIndex);
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 3:
+            BlackLivesMatterHeart();
+            mirrorHandler();
+            displayScreen();
+            break;
         }
-        if(MUP == true){
-           mirrorDowntoUp();
+        break;
+    case 3:
+        switch(chanel)
+        {
+        case 0:
+            mapNoiseToHeartWithOutline();
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 1:
+            mapNoiseToHeart();
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 2:
+            NoiseToScreen();
+            mirrorHandler();
+            displayScreen();
+            break;
+        case 3:
+            color = 211;
+            for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
+                for(int indPPG =0; indPPG<=5;indPPG++){
+                    ppg(indPPG);
+                }  
+            }
+            break;
         }
-        if(BLMB==true){
-        BLM();
-        }
-      displayScreen();
-
-      break;
-
-    case 6:
-      atlunited();
-      if(MLF==true){
-        mirrorLeftToRight();
-      }
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-        }
-      displayScreen();
-      break;
-
-    case 7:
-    //min user
-      tvColorCycle();
-      gradHeartsp();
-      delay(50);
-      displayScreen();
-      break;
-    case 8:
-      // For Max User
-      tvOutlineDisp();
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-        }
-      displayScreen();
-      break;
-    case 9:
-      // For random user
-      gradHeart();
-      displayScreen();
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      break;
-    case 10:
-      eyeTvU(eyeCount);
-      delay(750);
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-         mirrorDowntoUp();
-      }
-      displayScreen();
-      eyeCount++;
-      if(eyeCount>=3){
-        eyeCount=0;
-      }
-      
-      break;
-    case 11:
-      tvColorCycle();
-      displayScreen();
-      break;
-      
-    case 12:
-      colorScanner(158);
-      
-      break;
-
-    case 13:
-      // convert the noise data to colors in the LED array
-      // using the current palette
-      SectionGlitchesHeart();
-      if(MLF==true){
-        mirrorLeftToRight();
-      }
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      delay(random(250,1500));
-      displayScreen();
-      break;
-
-
-    case 14:
-      mapNoiseToHeart();
-      if(MLF==true){
-        mirrorLeftToRight();
-      }
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      displayScreen();
-      break;
-
-    case 15:
-      mahearta();
-      displayScreen();
-      break;
-
-
-    case 16:
-      NoiseToScreen();
-       if(MLF==true){
-        mirrorLeftToRight();
-      }
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      displayScreen();
-      break;
-
-    case 17:
-      SectionGlitchesHeart();
-      if(MLF==true){
-        mirrorLeftToRight();
-      }
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      delay(random(250,1500));
-      displayScreen();
-      break;
-
-    case 18:
-          // convert the noise data to colors in the LED array
-      // using the current palette
-      randomNoiseHeart();
-      if(MLF==true){
-        mirrorLeftToRight();
-      }
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      delay(random(12,125));
-      displayScreen();
-      break;
-
-      case 19:
-      mapNoiseToHeartWithOutline();
-      if(MLF==true){
-        mirrorLeftToRight();
-      }
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      displayScreen();
-      break;
-
-    case 20:
-      BlackLivesMatterHeart();
-      if(MLF==true){
-        mirrorLeftToRight();
-      }
-      if(MUD == true){
-        mirrorUptoDown();
-      }
-      if(MUP == true){
-        mirrorDowntoUp();
-      }
-      if(BLMB==true){
-        BLM();
-      }
-      displayScreen();
-      break;
- 
+        break;
   }
-
-    
-
-  //Serial.println(channelSwitch);
   posinold = posin;
 }
-
-
-
-
-
-
-
-
 
 
 //------------------------------------------------------------------------------------------------------
@@ -872,10 +652,8 @@ void callback(IRCMessage ircMessage) {
       client.sendMessage(IRC_CHAN, ircMessage.nick + " set atltvhead to the secret 0!");
       //Serial.println(chanel);
     }
-    else if(ircMessage.text == "<3"){
+    else if(ircMessage.text == "<3" || ircMessage.text =="atltvhSph"){
       chanel = 1;
-      channelSwitch = true;
-
       if(heartcount >= 2){
       client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, you've shown your heart! YOU ARE AWESOME! THANK YOU!!!!!!!!!!");
        for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
@@ -884,8 +662,6 @@ void callback(IRCMessage ircMessage) {
         }
        }
         heartcount = 0;
-        channelSwitch = true;
-        chanel = 9;
       }
       else{
         hcind = invheartc - heartcount;
@@ -900,7 +676,6 @@ void callback(IRCMessage ircMessage) {
           ppg(indPPG);
         }
        }
-       channelSwitch = true;
     }
     else if(ircMessage.text == "!flicker"){
       flicker = true;
@@ -911,52 +686,36 @@ void callback(IRCMessage ircMessage) {
     else if(ircMessage.text == "!brighter"){
       bright = bright +10;
       FastLED.setBrightness(bright);
-      channelSwitch = true;
     }
      else if(ircMessage.text == "!dimmer"){
       bright = bright -10;
       FastLED.setBrightness(bright);
-      channelSwitch = true;
     }
     else if(ircMessage.text =="!heartColor"){
          changeHeartHue();
-         channelSwitch = true;
     }
     else if(ircMessage.text =="!heartSat"){
          changeHeartSat();
-         channelSwitch = true;
     }
     else if(ircMessage.text =="!heartBright"){
          changeHeartVal();
-         channelSwitch = true;
     }
     else if(ircMessage.text =="!backgroundColor"){
          changeBackHue();
-         channelSwitch = true;
     }
     else if(ircMessage.text =="!backgroundSat"){
-         changeBackSat();
-         channelSwitch = true;
+        changeBackSat();
+
     }
     else if(ircMessage.text =="!backgroundBright"){
-         changeBackVal();
-         channelSwitch = true;
+        changeBackVal();
+
     }
     else if(ircMessage.text =="!reset"){
-      channelSwitch = true;
-      BLMB = false;
       resetHeart();
-    }
-    else if(ircMessage.text == "!rainbowHeart"&& HFM==false){
-      chanel = 2;
     }
     else if(ircMessage.text =="!fullRainbow"){
       fullrainbow = true;
-    }
-    else if(ircMessage.text =="!Merica" && ircMessage.nick == "atltvhead"){
-      channelSwitch = true;
-      //america();
-      resetHeart();
     }
     else if(ircMessage.text =="!mirrorRight"){
       MLF = true;
@@ -974,42 +733,12 @@ void callback(IRCMessage ircMessage) {
       MUD = true;
       MUP = false;
     }
-    else if(ircMessage.text =="!sparkles"){
-      chanel = 4;
-    }
-    else if(ircMessage.text =="atltvhSph"){
-      chanel = 4;
-    }
-    else if(ircMessage.text =="!Mahearta"){
-      chanel = 15;
-    }
-    else if(ircMessage.text =="atltvhRb"){
+    else if(ircMessage.text =="atltvhRb" || ircMessage.text == "!rainbowHeart"){
       chanel = 2;
       fullrainbow = true;
     }
-    else if(ircMessage.text =="High Five Mode Initiated" || ircMessage.text=="Fist Bump Mode Initiated"){
-       color = cHue;
-       
-       for(int ppgLooper =0; ppgLooper <= 1; ppgLooper++){
-        for(int indPPG =0; indPPG<=5;indPPG++){
-//          changeHeartHue();
-//          changeBackHue();
-          color = cHue;
-          ppg(indPPG);
-        }
-       }
-       oldChanel = chanel;
-       color = 211;
-       chanel = 4;
-       HFM = true;
-       channelSwitch = true;
-       STime = millis();
-    }
-    else if(ircMessage.text =="!rainbowHeart" && HFM==true ){
-      chanel=5;
-    }
-    else if(ircMessage.text =="!united"){
-      chanel=6;
+    else if(ircMessage.text =="!unite"){
+      chanel=3;
     }
     else if(selCheck == "~" && ircMessage.nick == "tvheadbot"){
       //do nothing for compile check
@@ -1052,11 +781,11 @@ void callback(IRCMessage ircMessage) {
       minValue = atoi(minUseNum.c_str());
     }
     else if(ircMessage.text == "!maxtvhead" && ircMessage.nick == maxuser){
-      chanel = 5;
+      chanel = 0;
       // do nothing for right now
     }
     else if(ircMessage.text == "!mintvhead" && ircMessage.nick == minuser){
-      chanel = 7;
+      chanel = 0;
       //do nothing for right now
     }
     else if(selCheck =="-" && ircMessage.nick == "tvheadbot"){
@@ -1068,47 +797,38 @@ void callback(IRCMessage ircMessage) {
       randuser.remove(0,1);
     }
     else if(ircMessage.text == "!randtvhead" && ircMessage.nick == randuser){
-      chanel = 8;
+      chanel = 0;
     }
-    else if(ircMessage.text == "!EyeLoveYou"){
-      chanel =10;
+    else if(ircMessage.text == "!random_motion_mode"){
+      mode = 0;
     }
-    else if(ircMessage.text == "!heartCycle"){
-      chanel=11;
+    else if(ircMessage.text == "!fist_pump_mode"){
+      mode = 2;
     }
-    else if(ircMessage.text == "!Scanner"){
-      chanel =12;
+    else if(ircMessage.text == "!wave_mode"){
+      mode = 1;
     }
-    else if(ircMessage.text =="!noiseHeart"){
-      chanel =14;
-    }
-    else if(ircMessage.text =="ITW"){
-      chanel=19;
-    }
-    else if(ircMessage.text =="!noiseScreen"){
-      chanel=16;
-    }
-    else if(ircMessage.text =="!jellyHeart"){
-      chanel=18;
-    }
-    else if(ircMessage.text =="!sGlitch"){
-      chanel=17;
-    }
-    else if(ircMessage.text == "!ONoise"){
-      chanel=19;
-    }
-    else if(ircMessage.text == "!blm"){
-     //BLMB = !BLMB;
-      chanel = 20;
+    else if(ircMessage.text == "!speed_mode"){
+      mode = 3;
     }
     
-
     return;
   }
  }
 
 
 
+void mirrorHandler(){
+    if(MLF==true){
+        mirrorLeftToRight();
+    }
+    if(MUD == true){
+        mirrorUptoDown();
+    }
+    if(MUP == true){
+        mirrorDowntoUp();
+    }
+}
 //--------------------------------------------------------------------------------------------------
 // these are the tvhead helper functions.
 
@@ -1165,20 +885,6 @@ void heart(){
     }  
   }
 }
-
-
-void BLM(){
-  /*
-  for( byte y = 0; y < kMatrixHeight; y++) {
-    for( byte x = 0; x < kMatrixWidth; x++) {
-      if(blm[y][x]){
-        leds[ XY(x, y)]  = CHSV( 0, 0, 255);
-      }
-    }  
-  }
-  */
-}
-
 
 
 void colorFillScreen(int hue12, int hue34){
@@ -1248,7 +954,6 @@ void resetHeart(){
 
 
 void ppg(byte frame){
-
   if(frame ==0){
     fill_solid(leds,NUM_LEDS, CHSV(oldColor,oldSat,255)); // change this to a solid fill
       FastLED.show();
@@ -1404,8 +1109,6 @@ void ppg(byte frame){
           leds[XY( xl, 1)] = CHSV(color,sat,255);
 
         }
-
-
       leds[XY( 2, 2)] = CHSV(color,sat,255);
       leds[XY( 15, 2)] = CHSV(color,sat,255);
 
@@ -1421,9 +1124,6 @@ void ppg(byte frame){
       leds[XY(5, 6)-1] = CHSV(color,sat,255);
       leds[XY(12, 6)-1] = CHSV(color,sat,255);
       }
-
-
-
     else{
       fill_solid(leds,NUM_LEDS, CHSV(color,sat,255)); // change this to a solid fill
       satHolder = oldSat;
@@ -1681,7 +1381,6 @@ void atlunited(){
 
 void gradHeartsp(){
   fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
-  
   for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){
       sprand = random(100);
@@ -1700,9 +1399,30 @@ void gradHeartsp(){
   }
 }
 
+void gradHeartspcycle(int hue12, int hue34){
+  fill_gradient(leds,0,CHSV(hue12,254,254),350,CHSV(hue34,254,254),SHORTEST_HUES);
+  for(byte y=0; y < kMatrixHeight;y++){
+    for(byte x=0; x<kMatrixWidth;x++){
+      sprand = random(100);
+      if(tv[y][x]){
+        if(sprand < 4 + minValue){
+         leds[XY(x,y)]=CHSV(cHue,0,cVal);
+        }
+        else{
+          //leds[XY(x,y)]=CHSV(cHue,cSat,cVal);
+        }
+      }
+      else{
+        leds[XY(x,y)]=CHSV(cbHue,cbSat,cbVal);
+      }
+    }
+  }
+  hue12++;
+  hue34++;
+}
+
 void gradHeart(){
   fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
-  
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1718,7 +1438,6 @@ void gradHeart(){
 
 void gradHeartShift(){
   fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
-  
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1812,27 +1531,6 @@ void eyeTvU(byte ci){
   }
 }
 
-
-//void tvSmallDisp(){
-//  for( byte y = 0; y < kMatrixHeight; y++) {
-//    for( byte x = 0; x < kMatrixWidth; x++) {
-//      if(tvSmall[y][x]){
-//        leds[ XY(x, y)]  = CHSV( cHue, cSat, cVal);
-//      }
-//    } 
-//  }
-//}
-//
-//void tvMediumDisp(){
-//  for( byte y = 0; y < kMatrixHeight; y++) {
-//    for( byte x = 0; x < kMatrixWidth; x++) {
-//      if(tvMedium[y][x]){
-//        leds[ XY(x, y)]  = CHSV( cHue, cSat, cVal);
-//      }
-//    } 
-//  }
-//}
-
 void tvColorCycle(){
   cur=millis();
     if(cur-last>diff){
@@ -1912,7 +1610,6 @@ void colorScanner(int cAdd){
 
 // this is where the wavey animation goes (user data input) with heart or background fill
 void wavey(){
-  
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        if(tv[y][x]){
@@ -2069,11 +1766,10 @@ void mapNoiseToHeart()
 
       CRGB color = ColorFromPalette( currentPalette, index, bri);
       if(tv[j][i]){
-      leds[XY(i,j)] = color;
+        leds[XY(i,j)] = color;
       }
     }
   }
-  
   ihue+=1;
 }
 
@@ -2278,7 +1974,7 @@ void mapNoiseToHeartWithOutline()
 
       CRGB color = ColorFromPalette( currentPalette, index, bri);
       if(tvMiddle[j][i]){
-      leds[XY(i,j)] = color;
+        leds[XY(i,j)] = color;
       }
     }
   }
