@@ -629,6 +629,10 @@ void loop() {
             break;
         }
         break;
+    case 4:
+        eyeTvU(eyeCount);
+        delay(500);
+        displayScreen();
   }
   posinold = posin;
 }
@@ -647,12 +651,12 @@ void callback(IRCMessage ircMessage) {
     selCheck = ircMessage.text[0];
     //Serial.println(selCheck);
     ///////////////////////////////////////////////////////////////////////////////////////////
-    if(ircMessage.text == "!ch0" && ircMessage.nick == "atltvhead"){
+    if((ircMessage.text == "!ch0" && ircMessage.nick == "atltvhead") || (ircMessage.text =="0" && ircMessage.nick == "atltvhead") || ircMessage.text=="LUL"){
       chanel = 0;
       client.sendMessage(IRC_CHAN, ircMessage.nick + " set atltvhead to the secret 0!");
       //Serial.println(chanel);
     }
-    else if(ircMessage.text == "<3" || ircMessage.text =="atltvhSph"){
+    else if(ircMessage.text == "<3" || ircMessage.text =="atltvhSph" || ircMessage.text =="1" || ircMessage.text =="!ch1" || ircMessage.text=="TwitchLit" || ircMessage.text =="TwitchUnity"){
       chanel = 1;
       if(heartcount >= 2){
       client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, you've shown your heart! YOU ARE AWESOME! THANK YOU!!!!!!!!!!");
@@ -668,6 +672,9 @@ void callback(IRCMessage ircMessage) {
         client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, we need " + hcind + " more people to show their '!heart'. LET'S DO THIS!");
         heartcount++;
       }
+    }
+    else if(ircMessage.text=="TheIlluminati"){
+      mode = 4;
     }
     else if(ircMessage.text == "1" && ircMessage.nick == "atltvhead"){
       //client.sendMessage(IRC_CHAN, ircMessage.nick + " It's PowerPuff Girl's Heart Time!");
@@ -733,11 +740,11 @@ void callback(IRCMessage ircMessage) {
       MUD = true;
       MUP = false;
     }
-    else if(ircMessage.text =="atltvhRb" || ircMessage.text == "!rainbowHeart"){
+    else if(ircMessage.text =="atltvhRb" || ircMessage.text == "!ch2" || ircMessage.text =="2" || ircMessage.text =="!rainbowHeart" || ircMessage.text=="KappaPride" || ircMessage.text=="VirtualHug" || ircMessage.text =="PridePaint"){
       chanel = 2;
       fullrainbow = true;
     }
-    else if(ircMessage.text =="!unite"){
+    else if(ircMessage.text =="!ch3" || ircMessage.text =="3" || ircMessage.text =="!United" || ircMessage.text =="!Mahearta" || ircMessage.text =="!unite" || ircMessage.text=="bleedPurple"){
       chanel=3;
     }
     else if(selCheck == "~" && ircMessage.nick == "tvheadbot"){
@@ -1528,6 +1535,10 @@ void eyeTvU(byte ci){
   }
   else if(ci==2){
     uDisp();
+  }
+  ci++;
+  if(ci>2){
+    ci=0;
   }
 }
 
