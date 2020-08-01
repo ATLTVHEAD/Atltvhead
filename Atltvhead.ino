@@ -75,6 +75,7 @@ uint16_t scale = 30; // scale is set dynamically once we've started up
 #define NUM_LEDS ((kMatrixWidth * kMatrixHeight))
 #define MAX_DIMENSION ((kMatrixWidth>kMatrixHeight) ? kMatrixWidth : kMatrixHeight)
 CRGB leds[NUM_LEDS];
+CRGB ledsbuff[NUM_LEDS];
 
 uint8_t noise[MAX_DIMENSION][MAX_DIMENSION];
 
@@ -135,7 +136,7 @@ uint32_t yHueDelta32 = 0;
 uint32_t xHueDelta32 = 0;
 uint32_t hue = 0;
 uint8_t angle = 0;
-uint8_t mode = 0;
+uint8_t mode = 1;
 
 bool HFM = false;
 double STime=0;
@@ -485,38 +486,19 @@ void loop() {
   // generate noise data
   fillnoise8();
 
-  if(flicker == true && flickoverRide == false){
-    FastLED.clear(true);
-    delay(250);
-    if(flick<20){
-      flick++;
-    }
-    else{
-      flick=0;
-      flicker = false;
-    }
-  }
-  else if(flickoverRide == true){
-    if(flick<2500000){
-      flick++;
-    }
-    else{
-      flick=0;
-      flickoverRide = false;
-    }
-  }
-
   switch(mode){
     case 0:
         switch(chanel)
         {
         case 0:
             tvOutlineDisp();
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
         case 1:
             gradHeart();
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
@@ -534,11 +516,13 @@ void loop() {
                     fullrainbow = false;
                 }
             }
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
         case 3:
             atlunited();
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
@@ -549,23 +533,28 @@ void loop() {
         {
         case 0:
             tvColorCycle();
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
         case 1:
-            gradHeartsp();
-            delay(50);
+            seawave2();
+            glitch_side_stutter();
+            //gradHeartsp();
+            //FastLED.delay(50);
             mirrorHandler();
             displayScreen();
             break;
         case 2:
             SectionGlitchesHeart();
+            glitch_side_stutter();
             mirrorHandler();
-            delay(random(250,1500));
+            delay(random(250,1000));
             displayScreen();
             break;
         case 3:
             mahearta();
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
@@ -576,11 +565,13 @@ void loop() {
         {
         case 0:
             gradHeartspcycle(cHue, cbHue);
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
         case 1:
             randomNoiseHeart();
+            glitch_side_stutter();
             mirrorHandler();
             delay(random(12,125));
             displayScreen();
@@ -592,10 +583,12 @@ void loop() {
             startIndex = startIndex + 3; /* motion speed */
             FillLEDsFromPaletteColors1( startIndex);
             mirrorHandler();
+            glitch_side_stutter();
             displayScreen();
             break;
         case 3:
             BlackLivesMatterHeart();
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
@@ -606,16 +599,19 @@ void loop() {
         {
         case 0:
             mapNoiseToHeartWithOutline();
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
         case 1:
             mapNoiseToHeart();
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
         case 2:
             NoiseToScreen();
+            glitch_side_stutter();
             mirrorHandler();
             displayScreen();
             break;
@@ -631,6 +627,7 @@ void loop() {
         break;
     case 4:
         eyeTvU(eyeCount);
+        glitch_side_stutter();
         delay(500);
         displayScreen();
   }
@@ -2012,4 +2009,82 @@ void BlackLivesMatterHeart(){
       }
     }  
   }
+}
+
+#define shift 30
+
+void seawave2(){
+  
+  CRGB oceancolor[4] = {0x003136, 0x2c8fa3, 0x9ec6d0, 0x4c738f}; //rgb color from bright to dark. 
+  fill_solid (ledsbuff, kMatrixWidth*kMatrixHeight,   oceancolor[0]);  // first color ,  ledbuff is buffer. define CRGB ledsbuff[NUM_LEDS];
+  for (byte i = 0; i < kMatrixWidth; i++) {     
+    for (byte z = 0; z < 3; z++) {                                               
+      byte   sinus = beatsin8 (30, 1, 4 , 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
+      for (byte k = sinus; k < kMatrixHeight; k++) {
+        ledsbuff[k * 39 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
+      }
+    }
+  }
+ 
+  fadeToBlackBy( ledsbuff, kMatrixWidth*kMatrixHeight, 200);   
+  blur2d( ledsbuff, kMatrixWidth, kMatrixHeight, 16);  
+ 
+  for (byte i = 0; i < kMatrixHeight; i++) {                              //  cycle for move ledbuffer to leds with your layout
+    for (byte k = 0; k < kMatrixWidth; k++) {
+      leds[XY(k, i)] = ledsbuff[312 - (i * 39) + k];     // change findNumByCoord (k, i) to your xy routine       
+      if(tv[i][k]){
+        leds[XY(k, i)]+=CHSV( 200, 225, 150);
+      }                              
+    }
+  }
+}
+
+void seawave3(){
+  
+  CRGB oceancolor[4] = {0x003136, 0x2c8fa3, 0x9ec6d0, 0x4c738f}; //rgb color from bright to dark. 
+  fill_solid (ledsbuff, kMatrixWidth*kMatrixHeight,   oceancolor[0]);  // first color ,  ledbuff is buffer. define CRGB ledsbuff[NUM_LEDS];
+  for (byte i = 0; i < kMatrixWidth; i++) {     
+    for (byte z = 0; z < 3; z++) {                                               
+      byte   sinus = beatsin8 (30, 1, 4 , 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
+      for (byte k = sinus; k < kMatrixHeight; k++) {
+        ledsbuff[k * 39 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
+      }
+    }
+  }
+ 
+  fadeToBlackBy( ledsbuff, kMatrixWidth*kMatrixHeight, 200);   
+  blur2d( ledsbuff, kMatrixWidth, kMatrixHeight, 16);  
+ 
+  for (byte i = 0; i < kMatrixHeight; i++) {                              //  cycle for move ledbuffer to leds with your layout
+    for (byte k = 0; k < kMatrixWidth; k++) {
+      leds[XY(k, i)] = ledsbuff[312 - (i * 39) + k];     // change findNumByCoord (k, i) to your xy routine                                    
+    }
+  }
+}
+
+
+void glitch_side_stutter(){
+  if(flicker == true && flickoverRide == false){
+    FastLED.delay(50);
+  }
+ /* if(flicker == true && flickoverRide == false){
+    FastLED.clear(true);
+    delay(250);
+    if(flick<20){
+      flick++;
+    }
+    else{
+      flick=0;
+      flicker = false;
+    }
+  }
+  else if(flickoverRide == true){
+    if(flick<2500000){
+      flick++;
+    }
+    else{
+      flick=0;
+      flickoverRide = false;
+    }
+  }*/
 }
