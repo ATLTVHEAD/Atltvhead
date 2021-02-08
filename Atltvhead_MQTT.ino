@@ -3,25 +3,32 @@
  * Apache License Version 2.0
  */
 #include <FastLED.h>
-#include <LEDMatrix.h>
-#include <LEDText.h>
-#include <FontMatrise.h>
-#include <WiFi.h>
-#include <IRCClient.h>
+//#include <LEDMatrix.h>
+//#include <LEDText.h>
+//#include <FontMatrise.h>
+#include "EspMQTTClient.h"
+#include "cred.h"
+#include <Arduino.h>
+#include <ArduinoJson.h>
 #include <Math.h> 
 #include <driver/i2s.h>
-#include "cred.h"
 
+const int capacity = JSON_OBJECT_SIZE(15); 
+StaticJsonDocument<capacity> doc;
 
+EspMQTTClient client(
+  SSID1,
+  PASSWORD1,
+  MQTTBROKER,  // MQTT Broker server ip
+  "atltvhead",     // Client name that uniquely identify your device
+  PORT
+);
 
 //-----------------------------------------------------------------------
 #define I2S_WS 15
 #define I2S_SD 13
 #define I2S_SCK 2
 #define I2S_PORT I2S_NUM_0 
-
-
-//Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
 
 //------------------------------------------------------------------------------------------------------//
@@ -44,10 +51,7 @@ const char *IRC_NICK=IRC_NICKH;
 const char *IRC_CHAN = IRC_CHANH;
 const char *IRC_PASS = IRC_PASSH;
 
-//naming wifi and server client
 
-WiFiClient wiFiClient;
-IRCClient client(IRC_SERVER, IRC_PORT, wiFiClient);
 
 //----------------------------------------------------------------------------------------------------//
 
@@ -121,9 +125,9 @@ uint16_t XY( uint8_t x, uint8_t y)
 #define MATRIX_HEIGHT  9
 #define MATRIX_TYPE    HORIZONTAL_ZIGZAG_MATRIX
 
-cLEDMatrix<MATRIX_WIDTH, -MATRIX_HEIGHT, MATRIX_TYPE> LEDs;
+//cLEDMatrix<MATRIX_WIDTH, -MATRIX_HEIGHT, MATRIX_TYPE> LEDs;
 
-cLEDText ScrollingMsg;
+//cLEDText ScrollingMsg;
 
 
 
@@ -148,7 +152,7 @@ char pasnum = 'B';
 
 //-------------------------
 
-const unsigned char txt[] = {EFFECT_SCROLL_LEFT "          B L A C K   L I V E S   M A T T E R                   "};
+//const unsigned char txt[] = {EFFECT_SCROLL_LEFT "          B L A C K   L I V E S   M A T T E R                   "};
 //const unsigned char txt[] = {"what up"};
 char inChar;
 int in = 0;
@@ -370,10 +374,10 @@ void setup() {
   //Serial.begin(115200);
   //---------------------
 
-  ScrollingMsg.SetFont(MatriseFontData);
-  ScrollingMsg.Init(&LEDs, LEDs.Width(), ScrollingMsg.FontHeight()+1, 0, 0);
-  ScrollingMsg.SetText((unsigned char *)txt, sizeof(txt) - 1);
-  ScrollingMsg.SetTextColrOptions(COLR_RGB | COLR_SINGLE, 0xff, 0x00, 0xff);
+  //ScrollingMsg.SetFont(MatriseFontData);
+  //ScrollingMsg.Init(&LEDs, LEDs.Width(), ScrollingMsg.FontHeight()+1, 0, 0);
+  //ScrollingMsg.SetText((unsigned char *)txt, sizeof(txt) - 1);
+  //ScrollingMsg.SetTextColrOptions(COLR_RGB | COLR_SINGLE, 0xff, 0x00, 0xff);
 
   //  FROM THE IRC TWITCHBOT CODE
   //-----------------------------------------------------------------------
@@ -386,86 +390,19 @@ void setup() {
 
 // add way to autochange wifi networks
 
-  WiFi.begin(ssid1, password1);
-
-  while (WiFi.status() != WL_CONNECTED) {
-
-    delay(250);
-
-    client.setCallback(callback);
-    client.setSentCallback(debugSentCallback);
-
-    if(wificount>15){
-        WiFi.disconnect();
-        break;
-    }
-    ++wificount;
-  }
+ // Optionnal functionnalities of EspMQTTClient : 
+  client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
+  client.enableHTTPWebUpdater(); // Enable the web updater. User and password default to values of MQTTUsername and MQTTPassword. These can be overrited with enableHTTPWebUpdater("user", "password").
+  client.enableLastWillMessage("TestClient/lastwill", "I am going offline");  // You can activate the retain flag by setting the third parameter to true
+  client.setMaxPacketSize(256);
 }
 
 
 
 void loop() {
 
-  if(WiFi.status() != WL_CONNECTED){
-
-    switch (pasnum){
-      case 'A':
-        WiFi.begin(ssid1, password1);
-        break;
-      case 'B':
-        WiFi.begin(ssid2, password2);
-        break;
-      case 'C':
-        WiFi.begin(ssid3,password3);
-        break;
-    }
-
-    while (WiFi.status() != WL_CONNECTED) {
-
-      delay(250);
-
-      client.setCallback(callback);
-      client.setSentCallback(debugSentCallback);
-
-      if(wificount>15){
-          WiFi.disconnect();
-          wificount = 0;
-          heart();
-          displayScreen();
-          if(pasnum =='A'){
-            pasnum='B';
-          }
-          else if(pasnum=='B'){
-            pasnum='C';
-          }
-          else{
-            pasnum='A';
-          }
-
-          break;
-      }
-      ++wificount;
-    }
-  }
-
-
-  // getting the Chat going and reading
+  // getting the MQTT going and reading
   //---------------------------------------------------------
-
-  if (!client.connected()) {
-    Serial.println("Attempting IRC connection...");
-    // Attempt to connect
-    if (client.connect(IRC_NICK, IRC_CHAN, IRC_PASS)) {
-    //Serial.println("connected");
-      client.sendMessage(IRC_CHAN, "Hello everyone! I'm TvheadBot, a construct, assistant within the head of Atltvhead. If you have any questions type !help , and I'll post a link to all the channel commands. Let's Tune into Good Vibes! <3");
-    } else {
-      //Serial.println("failed... try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
-    return;
-  }
   client.loop();
 
   int32_t sample = 0;
@@ -637,6 +574,48 @@ void loop() {
 //------------------------------------------------------------------------------------------------------
 // this is where the commands for chat are located
 
+void onConnectionEstablished()
+{
+  // Subscribe to "mytopic/test" and display received message to Serial
+  client.subscribe("stream_live", [](const String & payload) {
+    Serial.println(payload);
+  });
+  // Subscribe to "mytopic/test" and display received message to Serial
+  //client.subscribe("obs_webS_Connection", [](const String & payload) {
+    //Serial.println(payload);
+  //});
+  // Subscribe to "mytopic/test" and display received message to Serial
+  client.subscribe("viewer_click", [](const String & payload) {
+    chanel++;
+    if(chanel>=4){
+        chanel=0;
+    }
+    Serial.println(payload);
+  });
+
+  // Subscribe to "mytopic/wildcardtest/#" and display received message to Serial
+  //client.subscribe("mytopic/wildcardtest/#", [](const String & topic, const String & payload) {
+  //  Serial.println("(From wildcard) topic: " + topic + ", payload: " + payload);
+  //});
+
+  // Publish a message to "mytopic/test"
+  client.publish("tvhead", "alive"); // You can activate the retain flag by setting the third parameter to true
+  
+
+  // Execute delayed instructions
+  //client.executeDelayed(5 * 1000, []() {
+  //  client.publish("mytopic/wildcardtest/test123", "This is a message sent 5 seconds later");
+  //});
+}
+
+
+
+
+
+
+
+
+/*
 void callback(IRCMessage ircMessage) {
 //Serial.println("In CallBack");
   // PRIVMSG ignoring CTCP messages
@@ -818,7 +797,7 @@ void callback(IRCMessage ircMessage) {
     return;
   }
  }
-
+*/
 
 
 void mirrorHandler(){
@@ -1154,13 +1133,7 @@ void DrawOneFrame( byte startHue8, int8_t yHueDelta8, int8_t xHueDelta8)
 
 
 void displayScreen(){
-  if(chanel != 3){
-      FastLED.show();
-  }
-  else if(chanel ==3 && ScrollingMsg.UpdateText() !=-1){
-    FastLED.show();   
-    delay(75);
-  }
+  FastLED.show();
 }
 
 void demonDelay(long msec){
