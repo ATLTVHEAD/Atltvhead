@@ -573,6 +573,10 @@ void onConnectionEstablished()
   client.subscribe("tvhead_bright", [](const String & payload) {
     Serial.println(payload);
   });
+  // Subscribe to "mytopic/test" and display received message to Serial
+  client.subscribe("subscriber/event", [](const String & payload) {
+    Serial.println(payload);
+  });
   // gESTURE HANDLER
   client.subscribe("glove/gesture", [](const String & payload) {
     if(payload=="wave_mode"){
