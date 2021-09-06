@@ -183,27 +183,27 @@ uint8_t sprand=0;
 //--------------------------------------------
 
 bool tv[18][30]={
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0},
-  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1},
-  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1},
-  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0}
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0},
-  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1},
-  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1},
-  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0}
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
+  {0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
+  {0,0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
   };
 
-
+/*
 bool tv[9][39]={
   {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
@@ -214,6 +214,7 @@ bool tv[9][39]={
   {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
+*/
 
 bool tvMiddle[9][39]={
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -378,26 +379,7 @@ void setup() {
   U = random16();
   O = random16();
   P = random16();
-
-  //i2s_install();
-  //i2s_setpin();
-  //i2s_start(I2S_PORT);
-  delay(100);
-
-  //Serial.begin(115200);
-  //---------------------
-
-  //ScrollingMsg.SetFont(MatriseFontData);
-  //ScrollingMsg.Init(&LEDs, LEDs.Width(), ScrollingMsg.FontHeight()+1, 0, 0);
-  //ScrollingMsg.SetText((unsigned char *)txt, sizeof(txt) - 1);
-  //ScrollingMsg.SetTextColrOptions(COLR_RGB | COLR_SINGLE, 0xff, 0x00, 0xff);
-
-  //  FROM THE IRC TWITCHBOT CODE
-  //-----------------------------------------------------------------------
-
-
- // pinMode(LED_BUILTIN, OUTPUT);
-
+  
   delay(100);
   currentBlending = LINEARBLEND;
 
@@ -488,8 +470,8 @@ void loop() {
             displayScreen();
             break;
         case 1:
-            fill_color();
-            //seawave2();
+            //fill_color();
+            seawave2();
             //glitch_side_stutter();
             
             //gradHeartsp();
@@ -652,195 +634,6 @@ void onConnectionEstablished()
 
 
 
-
-
-
-
-/*
-void callback(IRCMessage ircMessage) {
-//Serial.println("In CallBack");
-  // PRIVMSG ignoring CTCP messages
-  if (ircMessage.command == "PRIVMSG" && ircMessage.text[0] != '\001') {
-    //Serial.println("Passed private message.");
-    String message("<" + ircMessage.nick + "> " + ircMessage.text);
-    Serial.println(message);
-    selCheck = ircMessage.text[0];
-    //Serial.println(selCheck);
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    if((ircMessage.text == "!ch0" && ircMessage.nick == "atltvhead") || (ircMessage.text =="0" && ircMessage.nick == "atltvhead") || ircMessage.text=="LUL"){
-      chanel = 0;
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " set atltvhead to the secret 0!");
-      //Serial.println(chanel);
-    }
-    else if(ircMessage.text == "<3" || ircMessage.text =="atltvhSph" || ircMessage.text =="1" || ircMessage.text =="!ch1" || ircMessage.text=="TwitchLit" || ircMessage.text =="TwitchUnity"){
-      chanel = 1;
-      if(heartcount >= 2){
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, you've shown your heart! YOU ARE AWESOME! THANK YOU!!!!!!!!!!");
-       for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
-        for(int indPPG =0; indPPG<=5;indPPG++){
-          ppg(indPPG);
-        }
-       }
-        heartcount = 0;
-      }
-      else{
-        hcind = invheartc - heartcount;
-        client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, we need " + hcind + " more people to show their '!heart'. LET'S DO THIS!");
-        heartcount++;
-      }
-    }
-    else if(ircMessage.text=="TheIlluminati"){
-      mode = 4;
-    }
-    else if(ircMessage.text == "1" && ircMessage.nick == "atltvhead"){
-      //client.sendMessage(IRC_CHAN, ircMessage.nick + " It's PowerPuff Girl's Heart Time!");
-       for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
-        for(int indPPG =0; indPPG<=5;indPPG++){
-          ppg(indPPG);
-        }
-       }
-    }
-    else if(ircMessage.text == "!flicker"){
-      flicker = true;
-    }
-    else if(ircMessage.text == "!flickerOff"){
-      flickoverRide = true;
-    }
-    else if(ircMessage.text == "!brighter"){
-      bright = bright +10;
-      FastLED.setBrightness(bright);
-    }
-     else if(ircMessage.text == "!dimmer"){
-      bright = bright -10;
-      FastLED.setBrightness(bright);
-    }
-    else if(ircMessage.text =="!heartColor"){
-         changeHeartHue();
-    }
-    else if(ircMessage.text =="!heartSat"){
-         changeHeartSat();
-    }
-    else if(ircMessage.text =="!heartBright"){
-         changeHeartVal();
-    }
-    else if(ircMessage.text =="!backgroundColor"){
-         changeBackHue();
-    }
-    else if(ircMessage.text =="!backgroundSat"){
-        changeBackSat();
-
-    }
-    else if(ircMessage.text =="!backgroundBright"){
-        changeBackVal();
-
-    }
-    else if(ircMessage.text =="!reset"){
-      resetHeart();
-    }
-    else if(ircMessage.text =="!fullRainbow"){
-      fullrainbow = true;
-    }
-    else if(ircMessage.text =="!mirrorRight"){
-      MLF = true;
-    }
-    else if(ircMessage.text =="!mirrorOff"){
-      MLF = false;
-      MUD = false;
-      MUP = false;
-    }
-    else if(ircMessage.text =="!mirrorUp"){
-      MUP = true;
-      MUD = false;
-    }
-    else if(ircMessage.text =="!mirrorDown"){
-      MUD = true;
-      MUP = false;
-    }
-    else if(ircMessage.text =="atltvhRb" || ircMessage.text == "!ch2" || ircMessage.text =="2" || ircMessage.text =="!rainbowHeart" || ircMessage.text=="KappaPride" || ircMessage.text=="VirtualHug" || ircMessage.text =="PridePaint"){
-      chanel = 2;
-      fullrainbow = true;
-    }
-    else if(ircMessage.text =="!ch3" || ircMessage.text =="3" || ircMessage.text =="!United" || ircMessage.text =="!Mahearta" || ircMessage.text =="!unite" || ircMessage.text=="bleedPurple"){
-      chanel=3;
-    }
-    else if(selCheck == "~" && ircMessage.nick == "tvheadbot"){
-      //do nothing for compile check
-      minuser = ircMessage.text;
-      minuser.remove(0,1);
-    }
-    else if(selCheck == "+" && ircMessage.nick == "tvheadbot"){
-      //do nothing for compile check
-      maxuser = ircMessage.text;
-      maxuser.remove(0,1);
-    }
-    else if(selCheck == "~" && ircMessage.nick == "atltvhead"){
-      //do nothing for compile check
-      minuser = ircMessage.text;
-      minuser.remove(0,1);
-    }
-    else if(selCheck == "+" && ircMessage.nick == "atltvhead"){
-      //do nothing for compile check
-      maxuser = ircMessage.text;
-      maxuser.remove(0,1);
-    }
-    else if(selCheck == ">" && ircMessage.nick == "atltvhead"){
-      maxUseNum = ircMessage.text;
-      maxUseNum.remove(0,1);
-      maxValue = atoi(maxUseNum.c_str());
-    }
-    else if(selCheck == "<" && ircMessage.nick == "atltvhead"){
-      minUseNum == ircMessage.text;
-      minUseNum.remove(0,1);
-      minValue = atoi(minUseNum.c_str());
-    }
-    else if(selCheck == ">" && ircMessage.nick == "tvheadbot"){
-      maxUseNum = ircMessage.text;
-      maxUseNum.remove(0,1);
-      maxValue = atoi(maxUseNum.c_str());
-    }
-    else if(selCheck == "<" && ircMessage.nick == "tvheadbot"){
-      minUseNum == ircMessage.text;
-      minUseNum.remove(0,1);
-      minValue = atoi(minUseNum.c_str());
-    }
-    else if(ircMessage.text == "!maxtvhead" && ircMessage.nick == maxuser){
-      chanel = 0;
-      // do nothing for right now
-    }
-    else if(ircMessage.text == "!mintvhead" && ircMessage.nick == minuser){
-      chanel = 0;
-      //do nothing for right now
-    }
-    else if(selCheck =="-" && ircMessage.nick == "tvheadbot"){
-      randuser = ircMessage.text;
-      randuser.remove(0,1);
-    }
-    else if(selCheck =="-" && ircMessage.nick == "atltvhead"){
-      randuser = ircMessage.text;
-      randuser.remove(0,1);
-    }
-    else if(ircMessage.text == "!randtvhead" && ircMessage.nick == randuser){
-      chanel = 0;
-    }
-    else if(ircMessage.text == "!random_motion_mode"){
-      mode = 0;
-    }
-    else if(ircMessage.text == "!fist_pump_mode"){
-      mode = 2;
-    }
-    else if(ircMessage.text == "!wave_mode"){
-      mode = 1;
-    }
-    else if(ircMessage.text == "!speed_mode"){
-      mode = 3;
-    }
-    
-    return;
-  }
- }
-*/
-
-
 void mirrorHandler(){
     if(MLF==true){
         mirrorLeftToRight();
@@ -855,39 +648,6 @@ void mirrorHandler(){
 //--------------------------------------------------------------------------------------------------
 // these are the tvhead helper functions.
 
-
-//-----------------------------------------------------------------------------------------------------------------------------------
-/*
-void i2s_install(){
-  const i2s_config_t i2s_config = {
-    .mode = i2s_mode_t(I2S_MODE_MASTER | I2S_MODE_RX),
-    .sample_rate = 44100,
-    .bits_per_sample = i2s_bits_per_sample_t(16),
-    .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
-    .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB),
-    .intr_alloc_flags = 0, // default interrupt priority
-    .dma_buf_count = 8,
-    .dma_buf_len = 64,
-    .use_apll = false
-  };
-  
-  i2s_driver_install(I2S_PORT, &i2s_config, 0, NULL);
-}
-
-void i2s_setpin(){
-    const i2s_pin_config_t pin_config = {
-      .bck_io_num = I2S_SCK,
-      .ws_io_num = I2S_WS,
-      .data_out_num = -1,
-      .data_in_num = I2S_SD
-    };
-    i2s_set_pin(I2S_PORT, &pin_config);
-}
-*/
-
-
-
-//_________________________________________________________________________________________
 // heart effect
 void heart(){
   for( byte y = 0; y < kMatrixHeight; y++) {
@@ -2027,7 +1787,7 @@ void seawave2(){
     for (byte z = 0; z < 3; z++) {                                               
       byte   sinus = beatsin8 (30, 1, 4 , 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
       for (byte k = sinus; k < kMatrixHeight; k++) {
-        ledsbuff[k * 39 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
+        ledsbuff[k * 30 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
       }
     }
   }
@@ -2037,7 +1797,7 @@ void seawave2(){
  
   for (byte i = 0; i < kMatrixHeight; i++) {                              //  cycle for move ledbuffer to leds with your layout
     for (byte k = 0; k < kMatrixWidth; k++) {
-      leds[XY(k, i)] = ledsbuff[312 - (i * 39) + k];     // change findNumByCoord (k, i) to your xy routine       
+      leds[XY(k, i)] = ledsbuff[(kMatrixHeight*kMatrixWidth) - (i * 30) + k];     // change findNumByCoord (k, i) to your xy routine       
       if(tv[i][k]){
         leds[XY(k, i)]+=CHSV( 200, 225, 150);
       }                              
