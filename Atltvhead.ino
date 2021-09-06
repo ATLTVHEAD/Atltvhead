@@ -1,6 +1,8 @@
 /* Atltvhead.ino - Arduino code of how atltvhead helmet runs
  * Created by Nate Damen, 2015 
  * Apache License Version 2.0
+ * Updated to use MQTT 
+ * Updated 09-5-2021
  */
 #include <FastLED.h>
 //#include <LEDMatrix.h>
@@ -11,7 +13,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Math.h> 
-#include <driver/i2s.h>
+//#include <driver/i2s.h>
 
 const int capacity = JSON_OBJECT_SIZE(15); 
 StaticJsonDocument<capacity> doc;
@@ -25,11 +27,11 @@ EspMQTTClient client(
 );
 
 //-----------------------------------------------------------------------
-#define I2S_WS 15
+/*#define I2S_WS 15
 #define I2S_SD 13
 #define I2S_SCK 2
 #define I2S_PORT I2S_NUM_0 
-
+*/
 
 //------------------------------------------------------------------------------------------------------//
 //wifi login setup
@@ -48,14 +50,14 @@ int posin = 0;
 int posinold = 0;
 //----------------------------------------------------------------------------------------------------//
 #define CHIPSET WS2812B
-#define PIN 17
+#define PIN 27
 #define COLOR_ORDER GRB
 
-int bright=255;
+int bright=50;
 
 // Params for width and height
-const uint8_t kMatrixWidth = 39;
-const uint8_t kMatrixHeight = 9;
+const uint8_t kMatrixWidth = 30;
+const uint8_t kMatrixHeight = 18;
 
 static uint16_t U;
 static uint16_t O;
@@ -110,8 +112,8 @@ uint16_t XY( uint8_t x, uint8_t y)
 }
 
 //------------------------
-#define MATRIX_WIDTH   39
-#define MATRIX_HEIGHT  9
+#define MATRIX_WIDTH   30
+#define MATRIX_HEIGHT  18
 #define MATRIX_TYPE    HORIZONTAL_ZIGZAG_MATRIX
 
 //cLEDMatrix<MATRIX_WIDTH, -MATRIX_HEIGHT, MATRIX_TYPE> LEDs;
@@ -179,6 +181,28 @@ boolean flickoverRide = false;
 unsigned int raincount = 0;
 uint8_t sprand=0;
 //--------------------------------------------
+
+bool tv[18][30]={
+  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0}
+  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0}
+  };
+
 
 bool tv[9][39]={
   {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
@@ -355,9 +379,9 @@ void setup() {
   O = random16();
   P = random16();
 
-  i2s_install();
-  i2s_setpin();
-  i2s_start(I2S_PORT);
+  //i2s_install();
+  //i2s_setpin();
+  //i2s_start(I2S_PORT);
   delay(100);
 
   //Serial.begin(115200);
@@ -393,13 +417,14 @@ void loop() {
   // getting the MQTT going and reading
   //---------------------------------------------------------
   client.loop();
-
+  /*
   int32_t sample = 0;
   int bytes = i2s_pop_sample(I2S_PORT, (char*)&sample, portMAX_DELAY);
   if(bytes >0){
     // This indicates if audio has occured. can be used as a switch. 
     yield();
   }
+  */
 
   ms = millis();
   yHueDelta32 = ((int32_t)sin16( ms * (27/1) ) * (350 / kMatrixWidth));
@@ -463,8 +488,10 @@ void loop() {
             displayScreen();
             break;
         case 1:
-            seawave2();
-            glitch_side_stutter();
+            fill_color();
+            //seawave2();
+            //glitch_side_stutter();
+            
             //gradHeartsp();
             //FastLED.delay(50);
             mirrorHandler();
@@ -830,7 +857,7 @@ void mirrorHandler(){
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------
-
+/*
 void i2s_install(){
   const i2s_config_t i2s_config = {
     .mode = i2s_mode_t(I2S_MODE_MASTER | I2S_MODE_RX),
@@ -856,7 +883,7 @@ void i2s_setpin(){
     };
     i2s_set_pin(I2S_PORT, &pin_config);
 }
-
+*/
 
 
 
@@ -2067,3 +2094,14 @@ void glitch_side_stutter(){
     }
   }*/
 }
+
+
+// this is where the wavey animation goes (user data input) with heart or background fill
+void fill_color(){
+  for(byte y=0; y < kMatrixHeight;y++){
+    for(byte x=0; x<kMatrixWidth;x++){
+      leds[XY(x,y)]=CHSV(cHue,cSat,cVal);
+    }
+  }
+}
+      
