@@ -53,10 +53,10 @@ int posinold = 0;
 #define PIN 27
 #define COLOR_ORDER GRB
 
-int bright=50;
+int bright=255;
 
 // Params for width and height
-const uint8_t kMatrixWidth = 30;
+const uint8_t kMatrixWidth = 30;   
 const uint8_t kMatrixHeight = 18;
 
 static uint16_t U;
@@ -67,6 +67,7 @@ uint16_t speed = 20;
 uint16_t scale = 30; // scale is set dynamically once we've started up
 
 #define NUM_LEDS ((kMatrixWidth * kMatrixHeight))
+int led_num = kMatrixWidth * kMatrixHeight;
 #define MAX_DIMENSION ((kMatrixWidth>kMatrixHeight) ? kMatrixWidth : kMatrixHeight)
 CRGB leds[NUM_LEDS];
 CRGB ledsbuff[NUM_LEDS];
@@ -130,7 +131,7 @@ uint32_t yHueDelta32 = 0;
 uint32_t xHueDelta32 = 0;
 uint32_t hue = 0;
 uint8_t angle = 0;
-uint8_t mode = 1;
+uint8_t mode = 0;
 
 bool HFM = false;
 double STime=0;
@@ -1150,7 +1151,7 @@ void atlunited(){
 }
 
 void gradHeartsp(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){
       sprand = random(100);
@@ -1170,7 +1171,7 @@ void gradHeartsp(){
 }
 
 void gradHeartspcycle(int hue12, int hue34){
-  fill_gradient(leds,0,CHSV(hue12,254,254),350,CHSV(hue34,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(hue12,254,254),led_num+25,CHSV(hue34,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){
       sprand = random(100);
@@ -1192,7 +1193,7 @@ void gradHeartspcycle(int hue12, int hue34){
 }
 
 void gradHeart(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1207,7 +1208,7 @@ void gradHeart(){
 }
 
 void gradHeartShift(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1223,7 +1224,7 @@ void gradHeartShift(){
 
 
 void gradBackground(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1785,7 +1786,7 @@ void seawave2(){
   fill_solid (ledsbuff, kMatrixWidth*kMatrixHeight,   oceancolor[0]);  // first color ,  ledbuff is buffer. define CRGB ledsbuff[NUM_LEDS];
   for (byte i = 0; i < kMatrixWidth; i++) {     
     for (byte z = 0; z < 3; z++) {                                               
-      byte   sinus = beatsin8 (30, 1, 4 , 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
+      byte   sinus = beatsin8 (30, 1, 13 , 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
       for (byte k = sinus; k < kMatrixHeight; k++) {
         ledsbuff[k * 30 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
       }
