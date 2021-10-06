@@ -5,15 +5,11 @@
  * Updated 10-6-2021
  */
 #include <FastLED.h>
-//#include <LEDMatrix.h>
-//#include <LEDText.h>
-//#include <FontMatrise.h>
 #include "EspMQTTClient.h"
 #include "cred.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Math.h> 
-#include <driver/i2s.h>
 
 const int capacity = JSON_OBJECT_SIZE(15); 
 StaticJsonDocument<capacity> doc;
@@ -41,13 +37,6 @@ EspMQTTClient client(
   mqttClientName,     // Client name that uniquely identify your device
   mqttServerPort
 );
-//-----------------------------------------------------------------------
-#define I2S_WS 15
-#define I2S_SD 13
-#define I2S_SCK 2
-#define I2S_PORT I2S_NUM_0 
-
-
 //----------------------------------------------------------------------------------------------------//
 
 int posin = 0;
@@ -410,11 +399,6 @@ void setup() {
   O = random16();
   P = random16();
 
-  i2s_install();
-  i2s_setpin();
-  i2s_start(I2S_PORT);
-  delay(100);
-
   Serial.begin(115200);
   //---------------------
 
@@ -448,13 +432,6 @@ void loop() {
   // getting the MQTT going and reading
   //---------------------------------------------------------
   client.loop();
-
-  int32_t sample = 0;
-  int bytes = i2s_pop_sample(I2S_PORT, (char*)&sample, portMAX_DELAY);
-  if(bytes >0){
-    // This indicates if audio has occured. can be used as a switch. 
-    yield();
-  }
 
   ms = millis();
   yHueDelta32 = ((int32_t)sin16( ms * (27/1) ) * (350 / kMatrixWidth));
@@ -675,196 +652,6 @@ void onConnectionEstablished()
 
 
 
-
-
-
-
-
-/*
-void callback(IRCMessage ircMessage) {
-//Serial.println("In CallBack");
-  // PRIVMSG ignoring CTCP messages
-  if (ircMessage.command == "PRIVMSG" && ircMessage.text[0] != '\001') {
-    //Serial.println("Passed private message.");
-    String message("<" + ircMessage.nick + "> " + ircMessage.text);
-    Serial.println(message);
-    selCheck = ircMessage.text[0];
-    //Serial.println(selCheck);
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    if((ircMessage.text == "!ch0" && ircMessage.nick == "atltvhead") || (ircMessage.text =="0" && ircMessage.nick == "atltvhead") || ircMessage.text=="LUL"){
-      chanel = 0;
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " set atltvhead to the secret 0!");
-      //Serial.println(chanel);
-    }
-    else if(ircMessage.text == "<3" || ircMessage.text =="atltvhSph" || ircMessage.text =="1" || ircMessage.text =="!ch1" || ircMessage.text=="TwitchLit" || ircMessage.text =="TwitchUnity"){
-      chanel = 1;
-      if(heartcount >= 2){
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, you've shown your heart! YOU ARE AWESOME! THANK YOU!!!!!!!!!!");
-       for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
-        for(int indPPG =0; indPPG<=5;indPPG++){
-          ppg(indPPG);
-        }
-       }
-        heartcount = 0;
-      }
-      else{
-        hcind = invheartc - heartcount;
-        client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, we need " + hcind + " more people to show their '!heart'. LET'S DO THIS!");
-        heartcount++;
-      }
-    }
-    else if(ircMessage.text=="TheIlluminati"){
-      mode = 4;
-    }
-    else if(ircMessage.text == "1" && ircMessage.nick == "atltvhead"){
-      //client.sendMessage(IRC_CHAN, ircMessage.nick + " It's PowerPuff Girl's Heart Time!");
-       for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
-        for(int indPPG =0; indPPG<=5;indPPG++){
-          ppg(indPPG);
-        }
-       }
-    }
-    else if(ircMessage.text == "!flicker"){
-      flicker = true;
-    }
-    else if(ircMessage.text == "!flickerOff"){
-      flickoverRide = true;
-    }
-    else if(ircMessage.text == "!brighter"){
-      bright = bright +10;
-      FastLED.setBrightness(bright);
-    }
-     else if(ircMessage.text == "!dimmer"){
-      bright = bright -10;
-      FastLED.setBrightness(bright);
-    }
-    else if(ircMessage.text =="!heartColor"){
-         changeHeartHue();
-    }
-    else if(ircMessage.text =="!heartSat"){
-         changeHeartSat();
-    }
-    else if(ircMessage.text =="!heartBright"){
-         changeHeartVal();
-    }
-    else if(ircMessage.text =="!backgroundColor"){
-         changeBackHue();
-    }
-    else if(ircMessage.text =="!backgroundSat"){
-        changeBackSat();
-
-    }
-    else if(ircMessage.text =="!backgroundBright"){
-        changeBackVal();
-
-    }
-    else if(ircMessage.text =="!reset"){
-      resetHeart();
-    }
-    else if(ircMessage.text =="!fullRainbow"){
-      fullrainbow = true;
-    }
-    else if(ircMessage.text =="!mirrorRight"){
-      MLF = true;
-    }
-    else if(ircMessage.text =="!mirrorOff"){
-      MLF = false;
-      MUD = false;
-      MUP = false;
-    }
-    else if(ircMessage.text =="!mirrorUp"){
-      MUP = true;
-      MUD = false;
-    }
-    else if(ircMessage.text =="!mirrorDown"){
-      MUD = true;
-      MUP = false;
-    }
-    else if(ircMessage.text =="atltvhRb" || ircMessage.text == "!ch2" || ircMessage.text =="2" || ircMessage.text =="!rainbowHeart" || ircMessage.text=="KappaPride" || ircMessage.text=="VirtualHug" || ircMessage.text =="PridePaint"){
-      chanel = 2;
-      fullrainbow = true;
-    }
-    else if(ircMessage.text =="!ch3" || ircMessage.text =="3" || ircMessage.text =="!United" || ircMessage.text =="!Mahearta" || ircMessage.text =="!unite" || ircMessage.text=="bleedPurple"){
-      chanel=3;
-    }
-    else if(selCheck == "~" && ircMessage.nick == "tvheadbot"){
-      //do nothing for compile check
-      minuser = ircMessage.text;
-      minuser.remove(0,1);
-    }
-    else if(selCheck == "+" && ircMessage.nick == "tvheadbot"){
-      //do nothing for compile check
-      maxuser = ircMessage.text;
-      maxuser.remove(0,1);
-    }
-    else if(selCheck == "~" && ircMessage.nick == "atltvhead"){
-      //do nothing for compile check
-      minuser = ircMessage.text;
-      minuser.remove(0,1);
-    }
-    else if(selCheck == "+" && ircMessage.nick == "atltvhead"){
-      //do nothing for compile check
-      maxuser = ircMessage.text;
-      maxuser.remove(0,1);
-    }
-    else if(selCheck == ">" && ircMessage.nick == "atltvhead"){
-      maxUseNum = ircMessage.text;
-      maxUseNum.remove(0,1);
-      maxValue = atoi(maxUseNum.c_str());
-    }
-    else if(selCheck == "<" && ircMessage.nick == "atltvhead"){
-      minUseNum == ircMessage.text;
-      minUseNum.remove(0,1);
-      minValue = atoi(minUseNum.c_str());
-    }
-    else if(selCheck == ">" && ircMessage.nick == "tvheadbot"){
-      maxUseNum = ircMessage.text;
-      maxUseNum.remove(0,1);
-      maxValue = atoi(maxUseNum.c_str());
-    }
-    else if(selCheck == "<" && ircMessage.nick == "tvheadbot"){
-      minUseNum == ircMessage.text;
-      minUseNum.remove(0,1);
-      minValue = atoi(minUseNum.c_str());
-    }
-    else if(ircMessage.text == "!maxtvhead" && ircMessage.nick == maxuser){
-      chanel = 0;
-      // do nothing for right now
-    }
-    else if(ircMessage.text == "!mintvhead" && ircMessage.nick == minuser){
-      chanel = 0;
-      //do nothing for right now
-    }
-    else if(selCheck =="-" && ircMessage.nick == "tvheadbot"){
-      randuser = ircMessage.text;
-      randuser.remove(0,1);
-    }
-    else if(selCheck =="-" && ircMessage.nick == "atltvhead"){
-      randuser = ircMessage.text;
-      randuser.remove(0,1);
-    }
-    else if(ircMessage.text == "!randtvhead" && ircMessage.nick == randuser){
-      chanel = 0;
-    }
-    else if(ircMessage.text == "!random_motion_mode"){
-      mode = 0;
-    }
-    else if(ircMessage.text == "!fist_pump_mode"){
-      mode = 2;
-    }
-    else if(ircMessage.text == "!wave_mode"){
-      mode = 1;
-    }
-    else if(ircMessage.text == "!speed_mode"){
-      mode = 3;
-    }
-    
-    return;
-  }
- }
-*/
-
-
 void mirrorHandler(){
     if(MLF==true){
         mirrorLeftToRight();
@@ -881,37 +668,6 @@ void mirrorHandler(){
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------
-
-void i2s_install(){
-  const i2s_config_t i2s_config = {
-    .mode = i2s_mode_t(I2S_MODE_MASTER | I2S_MODE_RX),
-    .sample_rate = 44100,
-    .bits_per_sample = i2s_bits_per_sample_t(16),
-    .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
-    .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB),
-    .intr_alloc_flags = 0, // default interrupt priority
-    .dma_buf_count = 8,
-    .dma_buf_len = 64,
-    .use_apll = false
-  };
-  
-  i2s_driver_install(I2S_PORT, &i2s_config, 0, NULL);
-}
-
-void i2s_setpin(){
-    const i2s_pin_config_t pin_config = {
-      .bck_io_num = I2S_SCK,
-      .ws_io_num = I2S_WS,
-      .data_out_num = -1,
-      .data_in_num = I2S_SD
-    };
-    i2s_set_pin(I2S_PORT, &pin_config);
-}
-
-
-
-
-//_________________________________________________________________________________________
 // heart effect
 void heart(){
   for( byte y = 0; y < kMatrixHeight; y++) {
