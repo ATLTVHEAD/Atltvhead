@@ -5,26 +5,15 @@
  * Updated 09-5-2021
  */
 #include <FastLED.h>
-//#include <LEDMatrix.h>
-//#include <LEDText.h>
-//#include <FontMatrise.h>
 #include "EspMQTTClient.h"
 #include "cred.h"
-#include <Arduino.h>
-#include <ArduinoJson.h>
+//#include <Arduino.h>
+//#include <ArduinoJson.h>
 #include <Math.h> 
-//#include <driver/i2s.h>
 
-const int capacity = JSON_OBJECT_SIZE(15); 
-StaticJsonDocument<capacity> doc;
+//const int capacity = JSON_OBJECT_SIZE(15); 
+//StaticJsonDocument<capacity> doc;
 
-EspMQTTClient client(
-  SSID1,
-  PASSWORD1,
-  MQTTBROKER,  // MQTT Broker server ip
-  "atltvhead",     // Client name that uniquely identify your device
-  PORT
-);
 
 //-----------------------------------------------------------------------
 /*#define I2S_WS 15
@@ -35,14 +24,30 @@ EspMQTTClient client(
 
 //------------------------------------------------------------------------------------------------------//
 //wifi login setup
-const char *ssid1 = SSID1;
-const char *password1 = PASSWORD1;
+const char* wifiSsid = SSID1;
+const char* wifiPassword = PASSWORD1;
 
-const char *ssid2 = SSID2;
-const char *password2 = PASSWORD2;
+const char* ssid2 = SSID2;
+const char* password2 = PASSWORD2;
 
-const char *ssid3 = SSID3;
-const char *password3 = PASSWORD3;
+const char* ssid3 = SSID3;
+const char* password3 = PASSWORD3;
+const char* mqttServerIp = MQTTBROKER;
+const short mqttServerPort = PORT;
+const char* mqttUser= MQTTUSER;
+const char* mqttPassword= MQTTPASSWORD;
+
+// Pubsub 
+EspMQTTClient client(
+  SSID1,
+  PASSWORD1,
+  MQTTBROKER,  // MQTT Broker server ip
+  MQTTUSER,   // Can be omitted if not needed
+  MQTTPASSWORD,
+  mqttClientName,     // Client name that uniquely identify your device
+  PORT
+);
+
 
 //----------------------------------------------------------------------------------------------------//
 
@@ -53,7 +58,7 @@ int posinold = 0;
 #define PIN 27
 #define COLOR_ORDER GRB
 
-int bright=255;
+int bright=150;
 
 // Params for width and height
 const uint8_t kMatrixWidth = 30;   
@@ -131,7 +136,7 @@ uint32_t yHueDelta32 = 0;
 uint32_t xHueDelta32 = 0;
 uint32_t hue = 0;
 uint8_t angle = 0;
-uint8_t mode = 0;
+uint8_t mode = 1;
 
 bool HFM = false;
 double STime=0;
@@ -186,13 +191,13 @@ uint8_t sprand=0;
 bool tv[18][30]={
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,1,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
-  {0,0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
-  {0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
-  {0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
-  {0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
-  {0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
-  {0,0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,0,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
+  {0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
@@ -204,30 +209,26 @@ bool tv[18][30]={
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
   };
 
-/*
-bool tv[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
-*/
-
-bool tvMiddle[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
-
+  bool tvMiddle[18][30]={
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+  };
 
 bool unibg[9][39]={
   {0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
@@ -255,27 +256,6 @@ bool eyeOpen[9][39]={
   {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
-bool eyeMid[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
-
-bool eyeClosed[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 bool u[9][39]={
   {0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
@@ -289,19 +269,47 @@ bool u[9][39]={
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 
-uint8_t marta[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,2,0,0,0,0,0,0,0,2,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,2,2,0,0,0,0,0,2,2,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,2,2,2,2,0,2,2,2,2,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
-
+uint8_t marta[18][30]={
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,2,2,0,0,0,0,2,2,3,3,3,3,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,2,2,2,0,0,2,2,2,3,3,3,3,3,0,0,0,0,0,0},
+  {0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,0,0,0,0,0},
+  {0,0,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,0,0,0,0},
+  {0,0,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,0,0,0,0},
+  {0,0,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,0,0,0,0},
+  {0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,2,2,2,2,2,2,2,2,3,3,3,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,3,3,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,3,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+  };
   
-
+uint8_t atl[18][30]={
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+  };
 
 
 //---------------------------------------------------------------------------------------------------//
@@ -349,9 +357,6 @@ int cur = 0;
 int last = 0;
 int diff = 50;
 
-
-
-
 CRGBPalette16 currentPalette( PartyColors_p);
 TBlendType    currentBlending;
 
@@ -364,10 +369,13 @@ extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
 #define HOLD_PALETTES_X_TIMES_AS_LONG 1
 
 
-
-
 void setup() {
-// From the FASTLED CODE
+  Serial.begin(115200);
+  delay(100);
+  // add way to autochange wifi networks
+ // Optionnal functionnalities of EspMQTTClient : 
+
+  // From the FASTLED CODE
   //---------------------------------------------
   FastLED.addLeds<CHIPSET, PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
   FastLED.setBrightness( bright );
@@ -383,31 +391,63 @@ void setup() {
   
   delay(100);
   currentBlending = LINEARBLEND;
-
-// add way to autochange wifi networks
-
- // Optionnal functionnalities of EspMQTTClient : 
+  delay(100);
   client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
   client.enableHTTPWebUpdater(); // Enable the web updater. User and password default to values of MQTTUsername and MQTTPassword. These can be overrited with enableHTTPWebUpdater("user", "password").
   client.enableLastWillMessage("TestClient/lastwill", "I am going offline");  // You can activate the retain flag by setting the third parameter to true
   client.setMaxPacketSize(256);
 }
 
+//------------------------------------------------------------------------------------------------------
+// this is where the commands for chat are located
+
+void onConnectionEstablished()
+{
+  // Subscribe to "mytopic/test" and display received message to Serial
+  client.subscribe("stream_live", [](const String & payload) {
+    Serial.println(payload);
+  });
+  // Subscribe to "mytopic/test" and display received message to Serial
+  client.subscribe("tvhead_bright", [](const String & payload) {
+    Serial.println(payload);
+  });
+  // Subscribe to "mytopic/test" and display received message to Serial
+  client.subscribe("subscriber/event", [](const String & payload) {
+    Serial.println(payload);
+  });
+  // gESTURE HANDLER
+  client.subscribe("glove/gesture", [](const String & payload) {
+    if(payload=="wave_mode"){
+      mode=1;      
+    }
+    else if(payload=="speed_mode"){
+      mode=3;      
+    }
+    else if(payload=="random_motion_mode"){
+      mode=0;      
+    }
+    else if(payload=="fist_pump_mode"){
+      mode=2;      
+    }   
+    Serial.println(payload);
+  });
+
+  
+  // Subscribe to "mytopic/test" and display received message to Serial
+  client.subscribe("viewer_click", [](const String & payload) {
+    chanel++;
+    if(chanel>=4){
+        chanel=0;
+    }
+    Serial.println(payload);
+  });
+
+  client.publish("tvhead", "alive"); // You can activate the retain flag by setting the third parameter to true
+}
 
 
 void loop() {
-
-  // getting the MQTT going and reading
-  //---------------------------------------------------------
   client.loop();
-  /*
-  int32_t sample = 0;
-  int bytes = i2s_pop_sample(I2S_PORT, (char*)&sample, portMAX_DELAY);
-  if(bytes >0){
-    // This indicates if audio has occured. can be used as a switch. 
-    yield();
-  }
-  */
 
   ms = millis();
   yHueDelta32 = ((int32_t)sin16( ms * (27/1) ) * (350 / kMatrixWidth));
@@ -568,70 +608,6 @@ void loop() {
   }
   posinold = posin;
 }
-
-
-//------------------------------------------------------------------------------------------------------
-// this is where the commands for chat are located
-
-void onConnectionEstablished()
-{
-  // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe("stream_live", [](const String & payload) {
-    Serial.println(payload);
-  });
-  // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe("tvhead_bright", [](const String & payload) {
-    Serial.println(payload);
-  });
-  // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe("subscriber/event", [](const String & payload) {
-    Serial.println(payload);
-  });
-  // gESTURE HANDLER
-  client.subscribe("glove/gesture", [](const String & payload) {
-    if(payload=="wave_mode"){
-      mode=1;      
-    }
-    else if(payload=="speed_mode"){
-      mode=3;      
-    }
-    else if(payload=="random_motion_mode"){
-      mode=0;      
-    }
-    else if(payload=="fist_pump_mode"){
-      mode=2;      
-    }   
-    
-    Serial.println(payload);
-  });
-
-  
-  // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe("viewer_click", [](const String & payload) {
-    chanel++;
-    if(chanel>=4){
-        chanel=0;
-    }
-    Serial.println(payload);
-  });
-
-
-
-  // Subscribe to "mytopic/wildcardtest/#" and display received message to Serial
-  //client.subscribe("mytopic/wildcardtest/#", [](const String & topic, const String & payload) {
-  //  Serial.println("(From wildcard) topic: " + topic + ", payload: " + payload);
-  //});
-
-  // Publish a message to "mytopic/test"
-  client.publish("tvhead", "alive"); // You can activate the retain flag by setting the third parameter to true
-  
-
-  // Execute delayed instructions
-  //client.executeDelayed(5 * 1000, []() {
-  //  client.publish("mytopic/wildcardtest/test123", "This is a message sent 5 seconds later");
-  //});
-}
-
 
 
 
@@ -1077,7 +1053,7 @@ void mahearta(){
 
 void FillLEDsFromPaletteColors1( uint8_t colorIndex)
 {
-   uint8_t brightness = 255;
+   uint8_t brightness = 150;
 
    for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){  
@@ -1105,7 +1081,7 @@ void FillLEDsFromPaletteColors1( uint8_t colorIndex)
 
 void FillLEDsFromPaletteColors2( uint8_t colorIndex)
 {
-   uint8_t brightness = 255;
+   uint8_t brightness = 150;
 
   for(int i=0;i<NUM_LEDS;i++){
           leds[i]=ColorFromPalette( currentPalette, colorIndex, bright, currentBlending);
@@ -1264,31 +1240,6 @@ void uDisp(){
   }
 }
 
-void eyeMidDisp(){
-  for( byte y = 0; y < kMatrixHeight; y++) {
-    for( byte x = 0; x < kMatrixWidth; x++) {
-      if(eyeMid[y][x]){
-        leds[ XY(x, y)]  = CHSV( cHue, cSat, cVal);
-      }
-      else{
-        leds[XY(x,y)]=CHSV(cbHue,cbSat,cbVal);
-      }
-    }  
-  }
-}
-
-void eyeClosedDisp(){
-  for( byte y = 0; y < kMatrixHeight; y++) {
-    for( byte x = 0; x < kMatrixWidth; x++) {
-      if(eyeClosed[y][x]){
-        leds[ XY(x, y)]  = CHSV( cHue, cSat, cVal);
-      }
-      else{
-        leds[XY(x,y)]=CHSV(cbHue,cbSat,cbVal);
-      }
-    }  
-  }
-}
 
 void eyeTvU(byte ci){
   if(ci==0){
@@ -1786,7 +1737,7 @@ void seawave2(){
   fill_solid (ledsbuff, kMatrixWidth*kMatrixHeight,   oceancolor[0]);  // first color ,  ledbuff is buffer. define CRGB ledsbuff[NUM_LEDS];
   for (byte i = 0; i < kMatrixWidth; i++) {     
     for (byte z = 0; z < 3; z++) {                                               
-      byte   sinus = beatsin8 (30, 1, 13 , 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
+      byte   sinus = beatsin8 (30, 1, 4, 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
       for (byte k = sinus; k < kMatrixHeight; k++) {
         ledsbuff[k * 30 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
       }
@@ -1812,7 +1763,7 @@ void seawave3(){
   fill_solid (ledsbuff, kMatrixWidth*kMatrixHeight,   oceancolor[0]);  // first color ,  ledbuff is buffer. define CRGB ledsbuff[NUM_LEDS];
   for (byte i = 0; i < kMatrixWidth; i++) {     
     for (byte z = 0; z < 3; z++) {                                               
-      byte   sinus = beatsin8 (30, 1, 4 , 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
+      byte   sinus = beatsin8 (30, 1, 4, 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
       for (byte k = sinus; k < kMatrixHeight; k++) {
         ledsbuff[k * 39 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
       }
