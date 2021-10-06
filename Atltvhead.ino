@@ -28,8 +28,7 @@ static uint16_t P;
 uint16_t speed = 20;
 uint16_t scale = 30; // scale is set dynamically once we've started up
 
-#define NUM_LEDS ((kMatrixWidth * kMatrixHeight))
-int led_num = kMatrixWidth * kMatrixHeight;
+#define NUM_LEDS (kMatrixWidth * kMatrixHeight)
 #define MAX_DIMENSION ((kMatrixWidth>kMatrixHeight) ? kMatrixWidth : kMatrixHeight)
 CRGB leds[NUM_LEDS];
 CRGB ledsbuff[NUM_LEDS];
@@ -86,7 +85,7 @@ uint16_t XY( uint8_t x, uint8_t y)
 
 
 int CurrentPatternNumber = 0; // Index number of which pattern is current
-uint8_t chanel = 1;
+uint8_t chanel = 0;
 uint8_t oldChanel = 1;
 uint32_t ms = 0;
 uint32_t yHueDelta32 = 0;
@@ -412,8 +411,8 @@ void loop() {
             break;
         case 1:
             //fill_color();
-            seawave2();
-            //glitch_side_stutter();
+            seawave();
+            glitch_side_stutter();
             //gradHeartsp();
             //FastLED.delay(50);
             mirrorHandler();
@@ -1026,7 +1025,7 @@ void atlunited(){
 }
 
 void gradHeartsp(){
-  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),NUM_LEDS+25,CHSV(0,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){
       sprand = random(100);
@@ -1046,7 +1045,7 @@ void gradHeartsp(){
 }
 
 void gradHeartspcycle(int hue12, int hue34){
-  fill_gradient(leds,0,CHSV(hue12,254,254),led_num+25,CHSV(hue34,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(hue12,254,254),NUM_LEDS+25,CHSV(hue34,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){
       sprand = random(100);
@@ -1068,7 +1067,7 @@ void gradHeartspcycle(int hue12, int hue34){
 }
 
 void gradHeart(){
-  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),NUM_LEDS+25,CHSV(0,254,254),SHORTEST_HUES);
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1083,7 +1082,7 @@ void gradHeart(){
 }
 
 void gradHeartShift(){
-  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),NUM_LEDS+25,CHSV(0,254,254),SHORTEST_HUES);
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1099,7 +1098,7 @@ void gradHeartShift(){
 
 
 void gradBackground(){
-  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),NUM_LEDS+25,CHSV(0,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1630,7 +1629,7 @@ void BlackLivesMatterHeart(){
 
 #define shift 30
 
-void seawave2(){
+void seawave(){
   
   CRGB oceancolor[4] = {0x003136, 0x2c8fa3, 0x9ec6d0, 0x4c738f}; //rgb color from bright to dark. 
   fill_solid (ledsbuff, kMatrixWidth*kMatrixHeight,   oceancolor[0]);  // first color ,  ledbuff is buffer. define CRGB ledsbuff[NUM_LEDS];
