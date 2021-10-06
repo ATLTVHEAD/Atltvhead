@@ -1,61 +1,25 @@
 /* Atltvhead.ino - Arduino code of how atltvhead helmet runs
  * Created by Nate Damen, 2015 
  * Apache License Version 2.0
+ * Updated to use MQTT 
+ * Updated 09-5-2021
  */
 #include <FastLED.h>
-//#include <LEDMatrix.h>
-//#include <LEDText.h>
-//#include <FontMatrise.h>
-#include "EspMQTTClient.h"
-#include "cred.h"
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <Math.h> 
-#include <driver/i2s.h>
-
-const int capacity = JSON_OBJECT_SIZE(15); 
-StaticJsonDocument<capacity> doc;
-
-EspMQTTClient client(
-  SSID1,
-  PASSWORD1,
-  MQTTBROKER,  // MQTT Broker server ip
-  "atltvhead",     // Client name that uniquely identify your device
-  PORT
-);
-
-//-----------------------------------------------------------------------
-#define I2S_WS 15
-#define I2S_SD 13
-#define I2S_SCK 2
-#define I2S_PORT I2S_NUM_0 
-
-
-//------------------------------------------------------------------------------------------------------//
-//wifi login setup
-const char *ssid1 = SSID1;
-const char *password1 = PASSWORD1;
-
-const char *ssid2 = SSID2;
-const char *password2 = PASSWORD2;
-
-const char *ssid3 = SSID3;
-const char *password3 = PASSWORD3;
-
-//----------------------------------------------------------------------------------------------------//
 
 int posin = 0;
 int posinold = 0;
 //----------------------------------------------------------------------------------------------------//
 #define CHIPSET WS2812B
-#define PIN 17
+#define PIN 27
 #define COLOR_ORDER GRB
 
-int bright=255;
+int bright=150;
 
 // Params for width and height
-const uint8_t kMatrixWidth = 39;
-const uint8_t kMatrixHeight = 9;
+const uint8_t kMatrixWidth = 30;   
+const uint8_t kMatrixHeight = 18;
 
 static uint16_t U;
 static uint16_t O;
@@ -65,6 +29,7 @@ uint16_t speed = 20;
 uint16_t scale = 30; // scale is set dynamically once we've started up
 
 #define NUM_LEDS ((kMatrixWidth * kMatrixHeight))
+int led_num = kMatrixWidth * kMatrixHeight;
 #define MAX_DIMENSION ((kMatrixWidth>kMatrixHeight) ? kMatrixWidth : kMatrixHeight)
 CRGB leds[NUM_LEDS];
 CRGB ledsbuff[NUM_LEDS];
@@ -110,8 +75,8 @@ uint16_t XY( uint8_t x, uint8_t y)
 }
 
 //------------------------
-#define MATRIX_WIDTH   39
-#define MATRIX_HEIGHT  9
+#define MATRIX_WIDTH   30
+#define MATRIX_HEIGHT  18
 #define MATRIX_TYPE    HORIZONTAL_ZIGZAG_MATRIX
 
 //cLEDMatrix<MATRIX_WIDTH, -MATRIX_HEIGHT, MATRIX_TYPE> LEDs;
@@ -180,28 +145,47 @@ unsigned int raincount = 0;
 uint8_t sprand=0;
 //--------------------------------------------
 
-bool tv[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
+bool tv[18][30]={
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,0,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
+  {0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
+  {0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+  };
 
-bool tvMiddle[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
-
+  bool tvMiddle[18][30]={
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+  };
 
 bool unibg[9][39]={
   {0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
@@ -229,27 +213,6 @@ bool eyeOpen[9][39]={
   {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
-bool eyeMid[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
-
-bool eyeClosed[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 bool u[9][39]={
   {0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
@@ -263,19 +226,47 @@ bool u[9][39]={
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 
-uint8_t marta[9][39]={
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,2,0,0,0,0,0,0,0,2,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,2,2,0,0,0,0,0,2,2,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,2,2,2,2,0,2,2,2,2,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
-
+uint8_t marta[18][30]={
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,2,2,0,0,0,0,2,2,3,3,3,3,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,2,2,2,0,0,2,2,2,3,3,3,3,3,0,0,0,0,0,0},
+  {0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,0,0,0,0,0},
+  {0,0,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,0,0,0,0},
+  {0,0,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,0,0,0,0},
+  {0,0,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,0,0,0,0},
+  {0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,0,0,0,0,0},
+  {0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,1,1,1,2,2,2,2,2,2,2,2,3,3,3,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,3,3,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,3,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+  };
   
-
+uint8_t atl[18][30]={
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+  };
 
 
 //---------------------------------------------------------------------------------------------------//
@@ -323,9 +314,6 @@ int cur = 0;
 int last = 0;
 int diff = 50;
 
-
-
-
 CRGBPalette16 currentPalette( PartyColors_p);
 TBlendType    currentBlending;
 
@@ -338,10 +326,11 @@ extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
 #define HOLD_PALETTES_X_TIMES_AS_LONG 1
 
 
-
-
 void setup() {
-// From the FASTLED CODE
+  Serial.begin(115200);
+  delay(100);
+
+  // From the FASTLED CODE
   //---------------------------------------------
   FastLED.addLeds<CHIPSET, PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
   FastLED.setBrightness( bright );
@@ -354,53 +343,12 @@ void setup() {
   U = random16();
   O = random16();
   P = random16();
-
-  i2s_install();
-  i2s_setpin();
-  i2s_start(I2S_PORT);
-  delay(100);
-
-  //Serial.begin(115200);
-  //---------------------
-
-  //ScrollingMsg.SetFont(MatriseFontData);
-  //ScrollingMsg.Init(&LEDs, LEDs.Width(), ScrollingMsg.FontHeight()+1, 0, 0);
-  //ScrollingMsg.SetText((unsigned char *)txt, sizeof(txt) - 1);
-  //ScrollingMsg.SetTextColrOptions(COLR_RGB | COLR_SINGLE, 0xff, 0x00, 0xff);
-
-  //  FROM THE IRC TWITCHBOT CODE
-  //-----------------------------------------------------------------------
-
-
- // pinMode(LED_BUILTIN, OUTPUT);
-
+  
   delay(100);
   currentBlending = LINEARBLEND;
-
-// add way to autochange wifi networks
-
- // Optionnal functionnalities of EspMQTTClient : 
-  client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
-  client.enableHTTPWebUpdater(); // Enable the web updater. User and password default to values of MQTTUsername and MQTTPassword. These can be overrited with enableHTTPWebUpdater("user", "password").
-  client.enableLastWillMessage("TestClient/lastwill", "I am going offline");  // You can activate the retain flag by setting the third parameter to true
-  client.setMaxPacketSize(256);
 }
 
-
-
 void loop() {
-
-  // getting the MQTT going and reading
-  //---------------------------------------------------------
-  client.loop();
-
-  int32_t sample = 0;
-  int bytes = i2s_pop_sample(I2S_PORT, (char*)&sample, portMAX_DELAY);
-  if(bytes >0){
-    // This indicates if audio has occured. can be used as a switch. 
-    yield();
-  }
-
   ms = millis();
   yHueDelta32 = ((int32_t)sin16( ms * (27/1) ) * (350 / kMatrixWidth));
   xHueDelta32 = ((int32_t)cos16( ms * (39/1) ) * (310 / kMatrixHeight));
@@ -463,8 +411,9 @@ void loop() {
             displayScreen();
             break;
         case 1:
+            //fill_color();
             seawave2();
-            glitch_side_stutter();
+            //glitch_side_stutter();
             //gradHeartsp();
             //FastLED.delay(50);
             mirrorHandler();
@@ -560,259 +509,6 @@ void loop() {
 }
 
 
-//------------------------------------------------------------------------------------------------------
-// this is where the commands for chat are located
-
-void onConnectionEstablished()
-{
-  // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe("stream_live", [](const String & payload) {
-    Serial.println(payload);
-  });
-  // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe("tvhead_bright", [](const String & payload) {
-    Serial.println(payload);
-  });
-  // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe("subscriber/event", [](const String & payload) {
-    Serial.println(payload);
-  });
-  // gESTURE HANDLER
-  client.subscribe("glove/gesture", [](const String & payload) {
-    if(payload=="wave_mode"){
-      mode=1;      
-    }
-    else if(payload=="speed_mode"){
-      mode=3;      
-    }
-    else if(payload=="random_motion_mode"){
-      mode=0;      
-    }
-    else if(payload=="fist_pump_mode"){
-      mode=2;      
-    }   
-    
-    Serial.println(payload);
-  });
-
-  
-  // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe("viewer_click", [](const String & payload) {
-    chanel++;
-    if(chanel>=4){
-        chanel=0;
-    }
-    Serial.println(payload);
-  });
-
-
-
-  // Subscribe to "mytopic/wildcardtest/#" and display received message to Serial
-  //client.subscribe("mytopic/wildcardtest/#", [](const String & topic, const String & payload) {
-  //  Serial.println("(From wildcard) topic: " + topic + ", payload: " + payload);
-  //});
-
-  // Publish a message to "mytopic/test"
-  client.publish("tvhead", "alive"); // You can activate the retain flag by setting the third parameter to true
-  
-
-  // Execute delayed instructions
-  //client.executeDelayed(5 * 1000, []() {
-  //  client.publish("mytopic/wildcardtest/test123", "This is a message sent 5 seconds later");
-  //});
-}
-
-
-
-
-
-
-
-
-/*
-void callback(IRCMessage ircMessage) {
-//Serial.println("In CallBack");
-  // PRIVMSG ignoring CTCP messages
-  if (ircMessage.command == "PRIVMSG" && ircMessage.text[0] != '\001') {
-    //Serial.println("Passed private message.");
-    String message("<" + ircMessage.nick + "> " + ircMessage.text);
-    Serial.println(message);
-    selCheck = ircMessage.text[0];
-    //Serial.println(selCheck);
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    if((ircMessage.text == "!ch0" && ircMessage.nick == "atltvhead") || (ircMessage.text =="0" && ircMessage.nick == "atltvhead") || ircMessage.text=="LUL"){
-      chanel = 0;
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " set atltvhead to the secret 0!");
-      //Serial.println(chanel);
-    }
-    else if(ircMessage.text == "<3" || ircMessage.text =="atltvhSph" || ircMessage.text =="1" || ircMessage.text =="!ch1" || ircMessage.text=="TwitchLit" || ircMessage.text =="TwitchUnity"){
-      chanel = 1;
-      if(heartcount >= 2){
-      client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, you've shown your heart! YOU ARE AWESOME! THANK YOU!!!!!!!!!!");
-       for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
-        for(int indPPG =0; indPPG<=5;indPPG++){
-          ppg(indPPG);
-        }
-       }
-        heartcount = 0;
-      }
-      else{
-        hcind = invheartc - heartcount;
-        client.sendMessage(IRC_CHAN, ircMessage.nick + " shows their heart! Thank you! Chat, we need " + hcind + " more people to show their '!heart'. LET'S DO THIS!");
-        heartcount++;
-      }
-    }
-    else if(ircMessage.text=="TheIlluminati"){
-      mode = 4;
-    }
-    else if(ircMessage.text == "1" && ircMessage.nick == "atltvhead"){
-      //client.sendMessage(IRC_CHAN, ircMessage.nick + " It's PowerPuff Girl's Heart Time!");
-       for(int ppgLooper =0; ppgLooper <= 3; ppgLooper++){
-        for(int indPPG =0; indPPG<=5;indPPG++){
-          ppg(indPPG);
-        }
-       }
-    }
-    else if(ircMessage.text == "!flicker"){
-      flicker = true;
-    }
-    else if(ircMessage.text == "!flickerOff"){
-      flickoverRide = true;
-    }
-    else if(ircMessage.text == "!brighter"){
-      bright = bright +10;
-      FastLED.setBrightness(bright);
-    }
-     else if(ircMessage.text == "!dimmer"){
-      bright = bright -10;
-      FastLED.setBrightness(bright);
-    }
-    else if(ircMessage.text =="!heartColor"){
-         changeHeartHue();
-    }
-    else if(ircMessage.text =="!heartSat"){
-         changeHeartSat();
-    }
-    else if(ircMessage.text =="!heartBright"){
-         changeHeartVal();
-    }
-    else if(ircMessage.text =="!backgroundColor"){
-         changeBackHue();
-    }
-    else if(ircMessage.text =="!backgroundSat"){
-        changeBackSat();
-
-    }
-    else if(ircMessage.text =="!backgroundBright"){
-        changeBackVal();
-
-    }
-    else if(ircMessage.text =="!reset"){
-      resetHeart();
-    }
-    else if(ircMessage.text =="!fullRainbow"){
-      fullrainbow = true;
-    }
-    else if(ircMessage.text =="!mirrorRight"){
-      MLF = true;
-    }
-    else if(ircMessage.text =="!mirrorOff"){
-      MLF = false;
-      MUD = false;
-      MUP = false;
-    }
-    else if(ircMessage.text =="!mirrorUp"){
-      MUP = true;
-      MUD = false;
-    }
-    else if(ircMessage.text =="!mirrorDown"){
-      MUD = true;
-      MUP = false;
-    }
-    else if(ircMessage.text =="atltvhRb" || ircMessage.text == "!ch2" || ircMessage.text =="2" || ircMessage.text =="!rainbowHeart" || ircMessage.text=="KappaPride" || ircMessage.text=="VirtualHug" || ircMessage.text =="PridePaint"){
-      chanel = 2;
-      fullrainbow = true;
-    }
-    else if(ircMessage.text =="!ch3" || ircMessage.text =="3" || ircMessage.text =="!United" || ircMessage.text =="!Mahearta" || ircMessage.text =="!unite" || ircMessage.text=="bleedPurple"){
-      chanel=3;
-    }
-    else if(selCheck == "~" && ircMessage.nick == "tvheadbot"){
-      //do nothing for compile check
-      minuser = ircMessage.text;
-      minuser.remove(0,1);
-    }
-    else if(selCheck == "+" && ircMessage.nick == "tvheadbot"){
-      //do nothing for compile check
-      maxuser = ircMessage.text;
-      maxuser.remove(0,1);
-    }
-    else if(selCheck == "~" && ircMessage.nick == "atltvhead"){
-      //do nothing for compile check
-      minuser = ircMessage.text;
-      minuser.remove(0,1);
-    }
-    else if(selCheck == "+" && ircMessage.nick == "atltvhead"){
-      //do nothing for compile check
-      maxuser = ircMessage.text;
-      maxuser.remove(0,1);
-    }
-    else if(selCheck == ">" && ircMessage.nick == "atltvhead"){
-      maxUseNum = ircMessage.text;
-      maxUseNum.remove(0,1);
-      maxValue = atoi(maxUseNum.c_str());
-    }
-    else if(selCheck == "<" && ircMessage.nick == "atltvhead"){
-      minUseNum == ircMessage.text;
-      minUseNum.remove(0,1);
-      minValue = atoi(minUseNum.c_str());
-    }
-    else if(selCheck == ">" && ircMessage.nick == "tvheadbot"){
-      maxUseNum = ircMessage.text;
-      maxUseNum.remove(0,1);
-      maxValue = atoi(maxUseNum.c_str());
-    }
-    else if(selCheck == "<" && ircMessage.nick == "tvheadbot"){
-      minUseNum == ircMessage.text;
-      minUseNum.remove(0,1);
-      minValue = atoi(minUseNum.c_str());
-    }
-    else if(ircMessage.text == "!maxtvhead" && ircMessage.nick == maxuser){
-      chanel = 0;
-      // do nothing for right now
-    }
-    else if(ircMessage.text == "!mintvhead" && ircMessage.nick == minuser){
-      chanel = 0;
-      //do nothing for right now
-    }
-    else if(selCheck =="-" && ircMessage.nick == "tvheadbot"){
-      randuser = ircMessage.text;
-      randuser.remove(0,1);
-    }
-    else if(selCheck =="-" && ircMessage.nick == "atltvhead"){
-      randuser = ircMessage.text;
-      randuser.remove(0,1);
-    }
-    else if(ircMessage.text == "!randtvhead" && ircMessage.nick == randuser){
-      chanel = 0;
-    }
-    else if(ircMessage.text == "!random_motion_mode"){
-      mode = 0;
-    }
-    else if(ircMessage.text == "!fist_pump_mode"){
-      mode = 2;
-    }
-    else if(ircMessage.text == "!wave_mode"){
-      mode = 1;
-    }
-    else if(ircMessage.text == "!speed_mode"){
-      mode = 3;
-    }
-    
-    return;
-  }
- }
-*/
-
 
 void mirrorHandler(){
     if(MLF==true){
@@ -828,39 +524,6 @@ void mirrorHandler(){
 //--------------------------------------------------------------------------------------------------
 // these are the tvhead helper functions.
 
-
-//-----------------------------------------------------------------------------------------------------------------------------------
-
-void i2s_install(){
-  const i2s_config_t i2s_config = {
-    .mode = i2s_mode_t(I2S_MODE_MASTER | I2S_MODE_RX),
-    .sample_rate = 44100,
-    .bits_per_sample = i2s_bits_per_sample_t(16),
-    .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
-    .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB),
-    .intr_alloc_flags = 0, // default interrupt priority
-    .dma_buf_count = 8,
-    .dma_buf_len = 64,
-    .use_apll = false
-  };
-  
-  i2s_driver_install(I2S_PORT, &i2s_config, 0, NULL);
-}
-
-void i2s_setpin(){
-    const i2s_pin_config_t pin_config = {
-      .bck_io_num = I2S_SCK,
-      .ws_io_num = I2S_WS,
-      .data_out_num = -1,
-      .data_in_num = I2S_SD
-    };
-    i2s_set_pin(I2S_PORT, &pin_config);
-}
-
-
-
-
-//_________________________________________________________________________________________
 // heart effect
 void heart(){
   for( byte y = 0; y < kMatrixHeight; y++) {
@@ -1289,7 +952,7 @@ void mahearta(){
 
 void FillLEDsFromPaletteColors1( uint8_t colorIndex)
 {
-   uint8_t brightness = 255;
+   uint8_t brightness = 150;
 
    for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){  
@@ -1317,7 +980,7 @@ void FillLEDsFromPaletteColors1( uint8_t colorIndex)
 
 void FillLEDsFromPaletteColors2( uint8_t colorIndex)
 {
-   uint8_t brightness = 255;
+   uint8_t brightness = 150;
 
   for(int i=0;i<NUM_LEDS;i++){
           leds[i]=ColorFromPalette( currentPalette, colorIndex, bright, currentBlending);
@@ -1363,7 +1026,7 @@ void atlunited(){
 }
 
 void gradHeartsp(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){
       sprand = random(100);
@@ -1383,7 +1046,7 @@ void gradHeartsp(){
 }
 
 void gradHeartspcycle(int hue12, int hue34){
-  fill_gradient(leds,0,CHSV(hue12,254,254),350,CHSV(hue34,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(hue12,254,254),led_num+25,CHSV(hue34,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){
       sprand = random(100);
@@ -1405,7 +1068,7 @@ void gradHeartspcycle(int hue12, int hue34){
 }
 
 void gradHeart(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1420,7 +1083,7 @@ void gradHeart(){
 }
 
 void gradHeartShift(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1436,7 +1099,7 @@ void gradHeartShift(){
 
 
 void gradBackground(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),led_num+25,CHSV(0,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1476,31 +1139,6 @@ void uDisp(){
   }
 }
 
-void eyeMidDisp(){
-  for( byte y = 0; y < kMatrixHeight; y++) {
-    for( byte x = 0; x < kMatrixWidth; x++) {
-      if(eyeMid[y][x]){
-        leds[ XY(x, y)]  = CHSV( cHue, cSat, cVal);
-      }
-      else{
-        leds[XY(x,y)]=CHSV(cbHue,cbSat,cbVal);
-      }
-    }  
-  }
-}
-
-void eyeClosedDisp(){
-  for( byte y = 0; y < kMatrixHeight; y++) {
-    for( byte x = 0; x < kMatrixWidth; x++) {
-      if(eyeClosed[y][x]){
-        leds[ XY(x, y)]  = CHSV( cHue, cSat, cVal);
-      }
-      else{
-        leds[XY(x,y)]=CHSV(cbHue,cbSat,cbVal);
-      }
-    }  
-  }
-}
 
 void eyeTvU(byte ci){
   if(ci==0){
@@ -1998,9 +1636,9 @@ void seawave2(){
   fill_solid (ledsbuff, kMatrixWidth*kMatrixHeight,   oceancolor[0]);  // first color ,  ledbuff is buffer. define CRGB ledsbuff[NUM_LEDS];
   for (byte i = 0; i < kMatrixWidth; i++) {     
     for (byte z = 0; z < 3; z++) {                                               
-      byte   sinus = beatsin8 (30, 1, 4 , 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
+      byte   sinus = beatsin8 (30, 1, 4, 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
       for (byte k = sinus; k < kMatrixHeight; k++) {
-        ledsbuff[k * 39 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
+        ledsbuff[k * 30 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
       }
     }
   }
@@ -2010,7 +1648,7 @@ void seawave2(){
  
   for (byte i = 0; i < kMatrixHeight; i++) {                              //  cycle for move ledbuffer to leds with your layout
     for (byte k = 0; k < kMatrixWidth; k++) {
-      leds[XY(k, i)] = ledsbuff[312 - (i * 39) + k];     // change findNumByCoord (k, i) to your xy routine       
+      leds[XY(k, i)] = ledsbuff[(kMatrixHeight*kMatrixWidth) - (i * 30) + k];     // change findNumByCoord (k, i) to your xy routine       
       if(tv[i][k]){
         leds[XY(k, i)]+=CHSV( 200, 225, 150);
       }                              
@@ -2024,7 +1662,7 @@ void seawave3(){
   fill_solid (ledsbuff, kMatrixWidth*kMatrixHeight,   oceancolor[0]);  // first color ,  ledbuff is buffer. define CRGB ledsbuff[NUM_LEDS];
   for (byte i = 0; i < kMatrixWidth; i++) {     
     for (byte z = 0; z < 3; z++) {                                               
-      byte   sinus = beatsin8 (30, 1, 4 , 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
+      byte   sinus = beatsin8 (30, 1, 4, 0, i * 256 / 45 + z * shift ) + z * 3; // 3 waves with shift
       for (byte k = sinus; k < kMatrixHeight; k++) {
         ledsbuff[k * 39 + i] =  oceancolor[z+1]; // draw sin wave with his color in buffer 
       }
@@ -2067,3 +1705,14 @@ void glitch_side_stutter(){
     }
   }*/
 }
+
+
+// this is where the wavey animation goes (user data input) with heart or background fill
+void fill_color(){
+  for(byte y=0; y < kMatrixHeight;y++){
+    for(byte x=0; x<kMatrixWidth;x++){
+      leds[XY(x,y)]=CHSV(cHue,cSat,cVal);
+    }
+  }
+}
+      
