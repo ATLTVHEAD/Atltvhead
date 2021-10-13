@@ -123,7 +123,7 @@ uint32_t yHueDelta32 = 0;
 uint32_t xHueDelta32 = 0;
 uint32_t hue = 0;
 uint8_t angle = 0;
-uint8_t mode = 1;
+uint8_t mode = 0;
 
 bool HFM = false;
 double STime=0;
@@ -1170,7 +1170,7 @@ void atlunited(){
 }
 
 void gradHeartsp(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),540,CHSV(0,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){
       sprand = random(100);
@@ -1190,7 +1190,7 @@ void gradHeartsp(){
 }
 
 void gradHeartspcycle(int hue12, int hue34){
-  fill_gradient(leds,0,CHSV(hue12,254,254),350,CHSV(hue34,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(hue12,254,254),540,CHSV(hue34,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
     for(byte x=0; x<kMatrixWidth;x++){
       sprand = random(100);
@@ -1212,7 +1212,7 @@ void gradHeartspcycle(int hue12, int hue34){
 }
 
 void gradHeart(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),540,CHSV(0,254,254),SHORTEST_HUES);
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1227,7 +1227,7 @@ void gradHeart(){
 }
 
 void gradHeartShift(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),540,CHSV(0,254,254),SHORTEST_HUES);
     for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
@@ -1243,7 +1243,7 @@ void gradHeartShift(){
 
 
 void gradBackground(){
-  fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(leds,0,CHSV(192,254,254),540,CHSV(0,254,254),SHORTEST_HUES);
   for(byte y=0; y < kMatrixHeight;y++){
      for(byte x=0; x<kMatrixWidth;x++){
        sprand = random(100);
