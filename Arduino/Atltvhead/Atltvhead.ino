@@ -7,10 +7,20 @@
 
  #import <FastLED.h>
 
+int cbHue = 135;
+int cbSat = 255;
+int cbVal = 255;
+int bright=255;
+uint8_t sprand=0;
+
+#define CHIPSET WS2812B
+#define PIN 27
+#define COLOR_ORDER GRB
 
 // Params for width and height
 const uint8_t kMatrixWidth = 30;
 const uint8_t kMatrixHeight = 18;
+
 
 #define NUM_LEDS ((kMatrixWidth * kMatrixHeight))
 #define MAX_DIMENSION ((kMatrixWidth>kMatrixHeight) ? kMatrixWidth : kMatrixHeight)
@@ -74,7 +84,6 @@ void setup() {
 
   gradHeart();
   displayScreen();
-
 }
 
 void gradHeart(){
@@ -90,4 +99,8 @@ void gradHeart(){
        }
      }
    }
+}
+
+void displayScreen(){
+  FastLED.show();
 }
