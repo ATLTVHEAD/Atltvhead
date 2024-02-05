@@ -86,6 +86,10 @@ void setup() {
   displayScreen();
 }
 
+void loop(){
+  //do nothing for now
+}
+
 void gradHeart(){
   fill_gradient(leds,0,CHSV(192,254,254),350,CHSV(0,254,254),SHORTEST_HUES);
     for(byte y=0; y < kMatrixHeight;y++){
