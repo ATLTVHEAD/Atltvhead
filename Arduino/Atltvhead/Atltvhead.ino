@@ -27,8 +27,8 @@ const uint8_t kMatrixHeight = 8;
 CRGB leds[NUM_LEDS];
 
 // use these to create 2 different buffers for gradient fills
-CRGB heartbuff[NUM_LEDS];
-CRGB bgbuff[NUM_LEDS];
+CHSV heartbuff[NUM_LEDS];
+CHSV bgbuff[NUM_LEDS];
 
 int sIndex = 0;
 int eIndex = NUM_LEDS - 1;
@@ -78,8 +78,8 @@ void setup() {
   FastLED.setBrightness(bright);
   FastLED.clear(true);
 
-  fill_gradient(heartbuff,sIndex,CHSV(192,254,254), eIndex ,CHSV(0,254,254),SHORTEST_HUES);
-  fill_gradient(bgbuff,sIndex,CHSV(135,255,255), eIndex ,CHSV(150,254,254),SHORTEST_HUES);
+  fill_gradient(heartbuff,sIndex,CHSV(200,254,254), eIndex ,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(bgbuff,sIndex,CHSV(135,255,255), eIndex ,CHSV(145,254,254),SHORTEST_HUES);
 
 
 
@@ -93,11 +93,9 @@ void loop(){
   delay(60);
   displayScreen();
 
-  // Fills do not work as intended, need's more context of the matrix nature of the screen
+ 
   // More work to be done here to make the fill rotation function properly
-  //computeSIndex();
-  //computeEIndex();
-  //rotateFills(sIndex,eIndex);
+  //rotateHeartFills();
 }
 
 void gradHeart(){
@@ -121,8 +119,17 @@ void gradHeart(){
 }
 
 void rotateFills(int start, int ending){
-  fill_gradient(heartbuff,start,CHSV(192,254,254), ending,CHSV(0,254,254),SHORTEST_HUES);
+  fill_gradient(heartbuff,start,CHSV(200,254,254), ending,CHSV(0,254,254),SHORTEST_HUES);
   fill_gradient(bgbuff,start,CHSV(135,255,255), ending,CHSV(150,254,254),SHORTEST_HUES);
+}
+
+void rotateHeartFills(){
+  CHSV oldStartColor = heartbuff[sIndex];
+  CHSV oldEndColor = heartbuff[eIndex];
+  computeSIndex();
+  computeEIndex();
+  fill_gradient(heartbuff,sIndex,CHSV(200,254,254), NUM_LEDS - 1, oldEndColor,SHORTEST_HUES);
+  fill_gradient(heartbuff,0,oldStartColor, eIndex,CHSV(0,254,254),SHORTEST_HUES);
 }
 
 void computeSIndex(){
