@@ -82,9 +82,26 @@ void setup() {
   fill_gradient(bgbuff,sIndex,CHSV(135,255,255), eIndex ,CHSV(145,254,254),SHORTEST_HUES);
 
 
-
-  gradHeart();
-  displayScreen();
+  // Startup animation row by row -> hopefully reduces spike current
+  for(byte y=0; y < kMatrixHeight;y++){
+     for(byte x=0; x<kMatrixWidth;x++){
+       sprand = random(100);
+       if(tv[y][x]){
+         //do nothing
+         if (sprand < 3){
+          leds[XY(x,y)]=CHSV(cbHue,0,cbVal);
+         }
+         else{
+          leds[XY(x,y)]=heartbuff[XY(x,y)];
+         }
+        }
+       else{
+         leds[XY(x,y)]=bgbuff[XY(x,y)];
+       }
+     }
+     displayScreen();
+     delay(250);
+   }
 }
 
 void loop(){
