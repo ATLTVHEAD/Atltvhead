@@ -83,8 +83,8 @@ void setup() {
 
 
   // Startup animation row by row -> hopefully reduces spike current
-  for(byte y=0; y < kMatrixHeight;y++){
-     for(byte x=0; x<kMatrixWidth;x++){
+  for(int y = kMatrixHeight-1 ; y > -1; y--){
+     for(int x = kMatrixWidth-1; x > -1; x--){
        sprand = random(100);
        if(tv[y][x]){
          //do nothing
@@ -100,7 +100,7 @@ void setup() {
        }
      }
      displayScreen();
-     delay(250);
+     delay(375);
    }
 }
 
